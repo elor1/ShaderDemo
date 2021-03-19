@@ -41,5 +41,34 @@ inline float ToDegrees(float r)
     return  r * 180.0f / PI;
 }
 
+// Find the minimum of three numbers (helper function for exercise below)
+inline float Min(float f1, float f2, float f3)
+{
+	float fMin = f1;
+	if (f2 < fMin)
+	{
+		fMin = f2;
+	}
+	if (f3 < fMin)
+	{
+		fMin = f3;
+	}
+	return fMin;
+}
 
-#endif // _MATH_HELPERS_H_DEFINED_
+// Find the maximum of three numbers (helper function for exercise below)
+inline float Max(float f1, float f2, float f3)
+{
+	float fMax = f1;
+	if (f2 > fMax)
+	{
+		fMax = f2;
+	}
+	if (f3 > fMax)
+	{
+		fMax = f3;
+	}
+	return fMax;
+}
+
+#endif  //_MATH_HELPERS_H_DEFINED_

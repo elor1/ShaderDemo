@@ -33,16 +33,17 @@
 // Constants controlling speed of movement/rotation (measured in units per second because we're using frame time)
 const float ROTATION_SPEED = 2.0f;  // 2 radians per second for rotation
 const float MOVEMENT_SPEED = 50.0f; // 50 units per second for movement (what a unit of length is depends on 3D model - i.e. an artist decision usually)
+const float LIGHT_STRENGTH_CHANGE = 0.1f;
+const float MAX_LIGHT_STRENGTH = 40.0f;
+const float LIGHT_COLOUR_CHANGE = 0.3f;
 
 
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
-Mesh* gAnimatedMesh;
-Mesh* gCrateMesh;
+Mesh* gTeapotMesh;
 Mesh* gGroundMesh;
 Mesh* gLightMesh;
 
-Model* gAnimated;
-Model* gCrate;
+Model* gTeapot;
 Model* gGround;
 
 Camera* gCamera;
@@ -55,6 +56,7 @@ struct Light
     Model*   model;
     CVector3 colour;
     float    strength;
+	bool	 increaseStrength;
 };
 Light gLights[NUM_LIGHTS]; 
 
@@ -94,11 +96,8 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 //--------------------------------------------------------------------------------------
 
 // DirectX objects controlling textures used in this lab
-ID3D11Resource*           gCharacterDiffuseSpecularMap    = nullptr; // This object represents the memory used by the texture on the GPU
-ID3D11ShaderResourceView* gCharacterDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
-
-ID3D11Resource*           gCrateDiffuseSpecularMap    = nullptr;
-ID3D11ShaderResourceView* gCrateDiffuseSpecularMapSRV = nullptr;
+ID3D11Resource*           gTeapotDiffuseSpecularMap    = nullptr; // This object represents the memory used by the texture on the GPU
+ID3D11ShaderResourceView* gTeapotDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
 
 ID3D11Resource*           gGroundDiffuseSpecularMap    = nullptr;
 ID3D11ShaderResourceView* gGroundDiffuseSpecularMapSRV = nullptr;
@@ -120,8 +119,7 @@ bool InitGeometry()
     // IMPORTANT NOTE: Will only keep the first object from the mesh - multipart objects will have parts missing - see later lab for more robust loader
     try 
     {
-        gAnimatedMesh = new Mesh("Bike.x");
-        gCrateMesh    = new Mesh("CargoContainer.x");
+		gTeapotMesh	  = new Mesh("Teapot.x");
         gGroundMesh   = new Mesh("Hills.x");
         gLightMesh    = new Mesh("Light.x");
     }
@@ -158,8 +156,7 @@ bool InitGeometry()
     // The LoadTexture function requires you to pass a ID3D11Resource* (e.g. &gCubeDiffuseMap), which manages the GPU memory for the
     // texture and also a ID3D11ShaderResourceView* (e.g. &gCubeDiffuseMapSRV), which allows us to use the texture in shaders
     // The function will fill in these pointers with usable data. The variables used here are globals found near the top of the file.
-    if (!LoadTexture("MetalDiffuseSpecular.dds", &gCharacterDiffuseSpecularMap, &gCharacterDiffuseSpecularMapSRV) ||
-        !LoadTexture("CargoA.dds",               &gCrateDiffuseSpecularMap,     &gCrateDiffuseSpecularMapSRV    ) ||
+    if (!LoadTexture("MetalDiffuseSpecular.dds", &gTeapotDiffuseSpecularMap, &gTeapotDiffuseSpecularMapSRV) ||
         !LoadTexture("GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
@@ -185,18 +182,13 @@ bool InitScene()
 {
     //// Set up scene ////
 
-    gAnimated = new Model(gAnimatedMesh);
-    gCrate    = new Model(gCrateMesh);
+	gTeapot = new Model(gTeapotMesh);
     gGround   = new Model(gGroundMesh);
 
 
 	// Initial positions
-	gAnimated->SetPosition({ 20, 0, 0 });
-    gAnimated->SetScale(2); // Increase model scale to 5.0 for the robot, which has been drawn at a different scale
-    gAnimated->SetRotation({ 0, ToRadians(135.0f), 0 });
-	gCrate-> SetPosition({ 45, 0, 45 });
-	gCrate-> SetScale(6);
-	gCrate-> SetRotation({ 0.0f, ToRadians(-50.0f), 0.0f });
+	gTeapot->SetPosition({ 20.0f, 0.0f, 0.0f });
+	gTeapot->SetScale(1.5f);
 
 
     // Light set-up - using an array this time
@@ -206,15 +198,16 @@ bool InitScene()
     }
 
     gLights[0].colour = { 0.8f, 0.8f, 1.0f };
-    gLights[0].strength = 10;
+    gLights[0].strength = MAX_LIGHT_STRENGTH;
     gLights[0].model->SetPosition({ 30, 20, 0 });
     gLights[0].model->SetScale(pow(gLights[0].strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+	gLights[0].increaseStrength = false;
 
     gLights[1].colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1].strength = 40;
+    gLights[1].strength = MAX_LIGHT_STRENGTH;
     gLights[1].model->SetPosition({ -20, 50, 20 });
     gLights[1].model->SetScale(pow(gLights[1].strength, 0.7f));
-
+	gLights[1].increaseStrength = false;
 
     //// Set up camera ////
 
@@ -235,10 +228,8 @@ void ReleaseResources()
     if (gLightDiffuseMap)                gLightDiffuseMap->Release();
     if (gGroundDiffuseSpecularMapSRV)    gGroundDiffuseSpecularMapSRV->Release();
     if (gGroundDiffuseSpecularMap)       gGroundDiffuseSpecularMap->Release();
-    if (gCrateDiffuseSpecularMapSRV)     gCrateDiffuseSpecularMapSRV->Release();
-    if (gCrateDiffuseSpecularMap)        gCrateDiffuseSpecularMap->Release();
-    if (gCharacterDiffuseSpecularMapSRV) gCharacterDiffuseSpecularMapSRV->Release();
-    if (gCharacterDiffuseSpecularMap)    gCharacterDiffuseSpecularMap->Release();
+    if (gTeapotDiffuseSpecularMapSRV) gTeapotDiffuseSpecularMapSRV->Release();
+    if (gTeapotDiffuseSpecularMap)    gTeapotDiffuseSpecularMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -252,13 +243,11 @@ void ReleaseResources()
     }
     delete gCamera;    gCamera    = nullptr;
     delete gGround;    gGround    = nullptr;
-    delete gCrate;     gCrate     = nullptr;
-    delete gAnimated;  gAnimated = nullptr;
+	delete gTeapot;	   gTeapot    = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
-    delete gCrateMesh;     gCrateMesh     = nullptr;
-    delete gAnimatedMesh;  gAnimatedMesh = nullptr;
+	delete gTeapotMesh;    gTeapotMesh    = nullptr;
 }
 
 
@@ -301,11 +290,8 @@ void RenderSceneFromCamera(Camera* camera)
     gGround->Render();
 
     // Render other lit models, only change textures for each onee
-    gD3DContext->PSSetShaderResources(0, 1, &gCharacterDiffuseSpecularMapSRV); 
-    gAnimated->Render();
-
-    gD3DContext->PSSetShaderResources(0, 1, &gCrateDiffuseSpecularMapSRV);
-    gCrate->Render();
+    gD3DContext->PSSetShaderResources(0, 1, &gTeapotDiffuseSpecularMapSRV); 
+    gTeapot->Render();
 
 
     //// Render lights ////
@@ -392,15 +378,47 @@ void RenderScene()
 void UpdateScene(float frameTime)
 {
 	// Control sphere (will update its world matrix)
-	gAnimated->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
+	gTeapot->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
 
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
-	static float rotate = 0.0f;
+	/*static float rotate = 0.0f;
     static bool go = true;
-	gLights[0].model->SetPosition( gAnimated->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
+	gLights[0].model->SetPosition( gTeapot->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
-    if (KeyHit(Key_1))  go = !go;
+    if (KeyHit(Key_1))  go = !go;*/
 
+	if (gLights[0].increaseStrength)
+	{
+		if (gLights[0].strength < MAX_LIGHT_STRENGTH)
+		{
+			gLights->strength += LIGHT_STRENGTH_CHANGE;
+		}
+		else
+		{
+			gLights[0].increaseStrength = false;
+		}
+	}
+	else
+	{
+		if (gLights[0].strength > 0)
+		{
+			gLights->strength -= LIGHT_STRENGTH_CHANGE;
+		}
+		else
+		{
+			gLights[0].increaseStrength = true;
+		}
+	}
+
+	CVector3 HSLColour = RGBToHSL(gLights[1].colour);
+	HSLColour.x += LIGHT_COLOUR_CHANGE;
+	if (HSLColour.x >= 360.0f)
+	{
+		HSLColour.x = 0.0f;
+	}
+	gLights[1].colour = HSLToRGB(HSLColour);
+	
+	
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
 
@@ -421,7 +439,7 @@ void UpdateScene(float frameTime)
         std::ostringstream frameTimeMs;
         frameTimeMs.precision(2);
         frameTimeMs << std::fixed << avgFrameTime * 1000;
-        std::string windowTitle = "CO2409 Week 21: Matrix Hierarchies / Animation - Frame Time: " + frameTimeMs.str() +
+        std::string windowTitle = "CO2409 Assignment - Frame Time: " + frameTimeMs.str() +
                                   "ms, FPS: " + std::to_string(static_cast<int>(1 / avgFrameTime + 0.5f));
         SetWindowTextA(gHWnd, windowTitle.c_str());
         totalFrameTime = 0;

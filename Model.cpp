@@ -26,7 +26,7 @@ Model::Model(Mesh* mesh, CVector3 position /*= { 0,0,0 }*/, CVector3 rotation /*
 // All other per-frame constants must have been set already along with shaders, textures, samplers, states etc.
 void Model::Render()
 {
-    mMesh->RenderRecursive(mWorldMatrices);
+    mMesh->Render(mWorldMatrices);
 }
 
 

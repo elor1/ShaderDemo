@@ -309,14 +309,20 @@ void Mesh::RenderRecursive(std::vector<CMatrix4x4>& modelMatrices, unsigned int 
 {
     // 1. Calculate absolute world matrix for the current node index. The modelMatrices are relative to the parent node so:
     //       Absolute world matrix = model matrix of this node * parent's world matrix
-    //CMatrix4x4 nodeWorldMatrix = 
+	CMatrix4x4 nodeWorldMatrix = modelMatrices[nodeIndex] * parentWorldMatrix;
 
     // 2. Set that absolute world matrix on the GPU (call the function shortly above)
+	SetWorldMatrixOnGPU(nodeWorldMatrix);
     
     // 3. Now the world matrix is ready on the GPU, render the sub-meshes for this node (function above)
+	RenderNodeSubMeshes(nodeIndex);
 
     // 4. Loop through all the child nodes of this node and render each one with this function (recursive call)
     //    Use mNodes[nodeIndex] to access node information. Think carefully what the parent world matrix parameter should be in the call
+	for (auto childNode : mNodes[nodeIndex].childNodes)
+	{
+		RenderRecursive(modelMatrices, childNode, nodeWorldMatrix);
+	}
 }
 
 
@@ -337,11 +343,20 @@ void Mesh::Render(std::vector<CMatrix4x4>& modelMatrices)
         //        Otherwise
         //            Absolute world matrix = model matrix of this node * parent's absolute matrix (get the parent index from thisNode)
         //    It would be even faster to "unroll" the first iteration of this loop: write the code for the root, then a loop for the remaining nodes.
-        //thisNode.absoluteMatrix =
+        if (nodeIndex == 0)
+        {
+			thisNode.absoluteMatrix = modelMatrices[nodeIndex];
+        }
+		else
+		{
+			thisNode.absoluteMatrix = modelMatrices[nodeIndex] * mNodes[thisNode.parentIndex].absoluteMatrix;
+		}
 
         // 2. Set that absolute world matrix on the GPU (call the function shortly above)
+		SetWorldMatrixOnGPU(thisNode.absoluteMatrix);
     
         // 3. Now the world matrix is ready on the GPU, render the sub-meshes for this node (function above)
+		RenderNodeSubMeshes(nodeIndex);
     }
 }
 
