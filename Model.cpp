@@ -10,71 +10,66 @@
 #include "GraphicsHelpers.h"
 #include "Mesh.h"
 
-void Model::Render()
+
+Model::Model(Mesh* mesh, CVector3 position /*= { 0,0,0 }*/, CVector3 rotation /*= { 0,0,0 }*/, float scale /*= 1*/)
+    : mMesh(mesh)
 {
-    UpdateWorldMatrix();
-
-    gPerModelConstants.worldMatrix = mWorldMatrix; // Update C++ side constant buffer
-    UpdateConstantBuffer(gPerModelConstantBuffer, gPerModelConstants); // Send to GPU
-
-    // Indicate that the constant buffer we just updated is for use in the vertex shader (VS) and pixel shader (PS)
-    gD3DContext->VSSetConstantBuffers(1, 1, &gPerModelConstantBuffer); // First parameter must match constant buffer number in the shader
-    gD3DContext->PSSetConstantBuffers(1, 1, &gPerModelConstantBuffer);
-
-    mMesh->Render();
+    // Set default matrices from mesh
+    mWorldMatrices.resize(mesh->NumberNodes());
+    for (int i = 0; i < mWorldMatrices.size(); ++i)
+        mWorldMatrices[i] = mesh->GetNodeDefaultMatrix(i);
 }
 
 
 
-// Control the model's position and rotation using keys provided. Amount of motion performed depends on frame time
-void Model::Control(float frameTime, KeyCode turnUp, KeyCode turnDown, KeyCode turnLeft, KeyCode turnRight,
-                                     KeyCode turnCW, KeyCode turnCCW, KeyCode moveForward, KeyCode moveBackward)
+// The render function simply passes this model's matrices over to Mesh:Render.
+// All other per-frame constants must have been set already along with shaders, textures, samplers, states etc.
+void Model::Render()
 {
-    UpdateWorldMatrix();
+    mMesh->RenderRecursive(mWorldMatrices);
+}
 
-	if (KeyHeld( turnDown ))
-	{
-		mRotation.x += ROTATION_SPEED * frameTime;
-	}
+
+// Control a given node in the model using keys provided. Amount of motion performed depends on frame time
+void Model::Control(int node, float frameTime, KeyCode turnUp, KeyCode turnDown, KeyCode turnLeft, KeyCode turnRight,
+                                               KeyCode turnCW, KeyCode turnCCW, KeyCode moveForward, KeyCode moveBackward)
+{
+    auto& matrix = mWorldMatrices[node]; // Use reference to node matrix to make code below more readable
+
 	if (KeyHeld( turnUp ))
 	{
-		mRotation.x -= ROTATION_SPEED * frameTime;
+		matrix = MatrixRotationX(ROTATION_SPEED * frameTime) * matrix;
+	}
+	if (KeyHeld( turnDown ))
+	{
+		matrix = MatrixRotationX(-ROTATION_SPEED * frameTime) * matrix;
 	}
 	if (KeyHeld( turnRight ))
 	{
-		mRotation.y += ROTATION_SPEED * frameTime;
+		matrix = MatrixRotationY(ROTATION_SPEED * frameTime) * matrix;
 	}
 	if (KeyHeld( turnLeft ))
 	{
-		mRotation.y -= ROTATION_SPEED * frameTime;
+		matrix = MatrixRotationY(-ROTATION_SPEED * frameTime) * matrix;
 	}
 	if (KeyHeld( turnCW ))
 	{
-		mRotation.z += ROTATION_SPEED * frameTime;
+		matrix = MatrixRotationZ(ROTATION_SPEED * frameTime) * matrix;
 	}
 	if (KeyHeld( turnCCW ))
 	{
-		mRotation.z -= ROTATION_SPEED * frameTime;
+		matrix = MatrixRotationZ(-ROTATION_SPEED * frameTime) * matrix;
 	}
 
 	// Local Z movement - move in the direction of the Z axis, get axis from world matrix
-    CVector3 localZDir = Normalise({ mWorldMatrix.e20, mWorldMatrix.e21, mWorldMatrix.e22 }); // normalise axis in case world matrix has scaling
+    CVector3 localZDir = Normalise(matrix.GetRow(2)); // normalise axis in case world matrix has scaling
 	if (KeyHeld( moveForward ))
 	{
-		mPosition.x += localZDir.x * MOVEMENT_SPEED * frameTime;
-		mPosition.y += localZDir.y * MOVEMENT_SPEED * frameTime;
-		mPosition.z += localZDir.z * MOVEMENT_SPEED * frameTime;
+
+		matrix.SetRow(3, matrix.GetRow(3) + localZDir * MOVEMENT_SPEED * frameTime);
 	}
 	if (KeyHeld( moveBackward ))
 	{
-		mPosition.x -= localZDir.x * MOVEMENT_SPEED * frameTime;
-		mPosition.y -= localZDir.y * MOVEMENT_SPEED * frameTime;
-		mPosition.z -= localZDir.z * MOVEMENT_SPEED * frameTime;
+		matrix.SetRow(3, matrix.GetRow(3) - localZDir * MOVEMENT_SPEED * frameTime);
 	}
-}
-
-
-void Model::UpdateWorldMatrix()
-{
-    mWorldMatrix = MatrixScaling(mScale) * MatrixRotationZ(mRotation.z) * MatrixRotationX(mRotation.x) * MatrixRotationY(mRotation.y) * MatrixTranslation(mPosition);
 }

@@ -4,9 +4,7 @@
 #ifndef _COMMON_H_INCLUDED_
 #define _COMMON_H_INCLUDED_
 
-#define NOMINMAX // windows.h is very old and for compatibilty reasons includes a very badly written
-                 // definition of min and max. It clashes with the STL std::min and std::max.
-                 // Use this line before windows.h to remove the problematic legacy definitions
+#define NOMINMAX
 #include <windows.h>
 #include <d3d11.h>
 #include <string>
@@ -68,19 +66,11 @@ struct PerFrameConstants
     float      padding1;       // Pad above variable to float4 (HLSL requirement - which we must duplicate in this the C++ version of the structure)
     CVector3   light1Colour;
     float      padding2;
-    CVector3   light1Facing;           // Spotlight facing direction (normal)
-    float      light1CosHalfAngle;     // cos(Spot light cone angle / 2). Precalculate in C++ the spotlight angle in this form to save doing in the shader
-    CMatrix4x4 light1ViewMatrix;       // For shadow mapping we treat lights like cameras so we need camera matrices for them (prepared on the C++ side)
-    CMatrix4x4 light1ProjectionMatrix; // --"--
 
     CVector3   light2Position;
     float      padding3;
     CVector3   light2Colour;
     float      padding4;
-    CVector3   light2Facing;
-    float      light2CosHalfAngle;
-    CMatrix4x4 light2ViewMatrix;
-    CMatrix4x4 light2ProjectionMatrix;
 
     CVector3   ambientColour;
     float      specularPower;

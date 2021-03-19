@@ -4,6 +4,8 @@
 
 #include "CMatrix4x4.h"
 
+#include <algorithm>
+
 /*-----------------------------------------------------------------------------------------
     Member functions
 -----------------------------------------------------------------------------------------*/
@@ -293,3 +295,16 @@ CVector3 CMatrix4x4::GetEulerAngles()
 	return { atan2(sX, cX), atan2(sY, cY), atan2(sZ, cZ) };
 }
 
+
+
+// Transpose the matrix (rows become columns). There are two ways to store a matrix, by rows or by columns.
+// Different apps use different methods. Use Transpose to swap when necessary.
+void CMatrix4x4::Transpose()
+{
+    std::swap(e01, e10);
+    std::swap(e02, e20);
+    std::swap(e03, e30);
+    std::swap(e12, e21);
+    std::swap(e13, e31);
+    std::swap(e23, e32);
+}

@@ -10,43 +10,43 @@ void Camera::Control(float frameTime, KeyCode turnUp, KeyCode turnDown, KeyCode 
                                       KeyCode moveForward, KeyCode moveBackward, KeyCode moveLeft, KeyCode moveRight)
 {
 	//**** ROTATION ****
-	if (KeyHeld(turnDown))
+	if (KeyHeld(Key_Down))
 	{
 		mRotation.x += ROTATION_SPEED * frameTime; // Use of frameTime to ensure same speed on different machines
 	}
-	if (KeyHeld(turnUp))
+	if (KeyHeld(Key_Up))
 	{
 		mRotation.x -= ROTATION_SPEED * frameTime;
 	}
-	if (KeyHeld(turnRight))
+	if (KeyHeld(Key_Right))
 	{
 		mRotation.y += ROTATION_SPEED * frameTime;
 	}
-	if (KeyHeld(turnLeft))
+	if (KeyHeld(Key_Left))
 	{
 		mRotation.y -= ROTATION_SPEED * frameTime;
 	}
 
 	//**** LOCAL MOVEMENT ****
-	if (KeyHeld(moveRight))
+	if (KeyHeld(Key_D))
 	{
 		mPosition.x += MOVEMENT_SPEED * frameTime * mWorldMatrix.e00; // See comments on local movement in UpdateCube code above
-		mPosition.y += MOVEMENT_SPEED * frameTime * mWorldMatrix.e01;
-		mPosition.z += MOVEMENT_SPEED * frameTime * mWorldMatrix.e02;
+		mPosition.y += MOVEMENT_SPEED * frameTime * mWorldMatrix.e01; 
+		mPosition.z += MOVEMENT_SPEED * frameTime * mWorldMatrix.e02; 
 	}
-	if (KeyHeld(moveLeft))
+	if (KeyHeld(Key_A))
 	{
 		mPosition.x -= MOVEMENT_SPEED * frameTime * mWorldMatrix.e00;
 		mPosition.y -= MOVEMENT_SPEED * frameTime * mWorldMatrix.e01;
 		mPosition.z -= MOVEMENT_SPEED * frameTime * mWorldMatrix.e02;
 	}
-	if (KeyHeld(moveForward))
+	if (KeyHeld(Key_W))
 	{
 		mPosition.x += MOVEMENT_SPEED * frameTime * mWorldMatrix.e20;
 		mPosition.y += MOVEMENT_SPEED * frameTime * mWorldMatrix.e21;
 		mPosition.z += MOVEMENT_SPEED * frameTime * mWorldMatrix.e22;
 	}
-	if (KeyHeld(moveBackward))
+	if (KeyHeld(Key_S))
 	{
 		mPosition.x -= MOVEMENT_SPEED * frameTime * mWorldMatrix.e20;
 		mPosition.y -= MOVEMENT_SPEED * frameTime * mWorldMatrix.e21;
@@ -71,10 +71,10 @@ void Camera::UpdateMatrices()
     float scaleZa = mFarClip / (mFarClip - mNearClip);
     float scaleZb = -mNearClip * scaleZa;
 
-    mProjectionMatrix = CMatrix4x4{ scaleX,   0.0f,    0.0f,   0.0f,
-                                      0.0f, scaleY,    0.0f,   0.0f,
-                                      0.0f,   0.0f, scaleZa,   1.0f,
-                                      0.0f,   0.0f, scaleZb,   0.0f };
+    mProjectionMatrix = { scaleX,   0.0f,    0.0f,   0.0f,
+                            0.0f, scaleY,    0.0f,   0.0f,
+                            0.0f,   0.0f, scaleZa,   1.0f,
+                            0.0f,   0.0f, scaleZb,   0.0f };
 
     // The view-projection matrix combines the two matrices usually used for the camera into one, which can save a multiply in the shaders (optional)
     mViewProjectionMatrix = mViewMatrix * mProjectionMatrix;
