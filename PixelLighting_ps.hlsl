@@ -36,7 +36,7 @@ float4 main(LightingPixelShaderInput input) : SV_Target
     float3 cameraDirection = normalize(gCameraPosition - input.worldPosition);
 
 	//// Light 1 ////
-
+	
 	// Direction and distance from pixel to light
 	float3 light1Direction = normalize(gLight1Position - input.worldPosition);
     float3 light1Dist = length(gLight1Position - input.worldPosition);

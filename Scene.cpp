@@ -37,13 +37,14 @@ const float LIGHT_STRENGTH_CHANGE = 0.1f;
 const float MAX_LIGHT_STRENGTH = 40.0f;
 const float LIGHT_COLOUR_CHANGE = 0.3f;
 
-
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
 Mesh* gTeapotMesh;
+Mesh* gSphereMesh;
 Mesh* gGroundMesh;
 Mesh* gLightMesh;
 
 Model* gTeapot;
+Model* gSphere;
 Model* gGround;
 
 Camera* gCamera;
@@ -99,6 +100,9 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 ID3D11Resource*           gTeapotDiffuseSpecularMap    = nullptr; // This object represents the memory used by the texture on the GPU
 ID3D11ShaderResourceView* gTeapotDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
 
+ID3D11Resource*           gSphereDiffuseSpecularMap = nullptr;
+ID3D11ShaderResourceView* gSphereDiffuseSpecularMapSRV = nullptr;
+
 ID3D11Resource*           gGroundDiffuseSpecularMap    = nullptr;
 ID3D11ShaderResourceView* gGroundDiffuseSpecularMapSRV = nullptr;
 
@@ -120,6 +124,7 @@ bool InitGeometry()
     try 
     {
 		gTeapotMesh	  = new Mesh("Teapot.x");
+		gSphereMesh	  = new Mesh("Sphere.x");
         gGroundMesh   = new Mesh("Hills.x");
         gLightMesh    = new Mesh("Light.x");
     }
@@ -157,6 +162,7 @@ bool InitGeometry()
     // texture and also a ID3D11ShaderResourceView* (e.g. &gCubeDiffuseMapSRV), which allows us to use the texture in shaders
     // The function will fill in these pointers with usable data. The variables used here are globals found near the top of the file.
     if (!LoadTexture("MetalDiffuseSpecular.dds", &gTeapotDiffuseSpecularMap, &gTeapotDiffuseSpecularMapSRV) ||
+		!LoadTexture("tiles1.jpg", &gSphereDiffuseSpecularMap, &gSphereDiffuseSpecularMapSRV) ||
         !LoadTexture("GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
@@ -183,6 +189,7 @@ bool InitScene()
     //// Set up scene ////
 
 	gTeapot = new Model(gTeapotMesh);
+	gSphere = new Model(gSphereMesh);
     gGround   = new Model(gGroundMesh);
 
 
@@ -190,6 +197,7 @@ bool InitScene()
 	gTeapot->SetPosition({ 20.0f, 0.0f, 0.0f });
 	gTeapot->SetScale(1.5f);
 
+	gSphere->SetPosition({ 0.0f, 20.0f, 50.0f });
 
     // Light set-up - using an array this time
     for (int i = 0; i < NUM_LIGHTS; ++i)
@@ -230,6 +238,8 @@ void ReleaseResources()
     if (gGroundDiffuseSpecularMap)       gGroundDiffuseSpecularMap->Release();
     if (gTeapotDiffuseSpecularMapSRV) gTeapotDiffuseSpecularMapSRV->Release();
     if (gTeapotDiffuseSpecularMap)    gTeapotDiffuseSpecularMap->Release();
+	if (gSphereDiffuseSpecularMapSRV) gSphereDiffuseSpecularMapSRV->Release();
+	if (gSphereDiffuseSpecularMap)    gSphereDiffuseSpecularMap->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -244,10 +254,12 @@ void ReleaseResources()
     delete gCamera;    gCamera    = nullptr;
     delete gGround;    gGround    = nullptr;
 	delete gTeapot;	   gTeapot    = nullptr;
+	delete gSphere;	   gSphere    = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
 	delete gTeapotMesh;    gTeapotMesh    = nullptr;
+	delete gSphereMesh;	   gSphere		  = nullptr;
 }
 
 
@@ -294,11 +306,17 @@ void RenderSceneFromCamera(Camera* camera)
     gTeapot->Render();
 
 
+	// Select which shaders to use next
+	gD3DContext->VSSetShader(gWiggleVertexShader, nullptr, 0);
+	gD3DContext->PSSetShader(gSpherePixelShader, nullptr, 0);
+	gD3DContext->PSSetShaderResources(0, 1, &gSphereDiffuseSpecularMapSRV);
+	gSphere->Render();
+
     //// Render lights ////
 
     // Select which shaders to use next
-    gD3DContext->VSSetShader(gBasicTransformVertexShader, nullptr, 0);
-    gD3DContext->PSSetShader(gLightModelPixelShader,      nullptr, 0);
+	gD3DContext->VSSetShader(gBasicTransformVertexShader, nullptr, 0);
+	gD3DContext->PSSetShader(gLightModelPixelShader, nullptr, 0);
 
     // Select the texture and sampler to use in the pixel shader
     gD3DContext->PSSetShaderResources(0, 1, &gLightDiffuseMapSRV); // First parameter must match texture slot number in the shaer
@@ -377,9 +395,12 @@ void RenderScene()
 // Update models and camera. frameTime is the time passed since the last frame
 void UpdateScene(float frameTime)
 {
+	gPerFrameConstants.gTime += frameTime;
+	gPerFrameConstants.gWiggle += 10 * frameTime;
+	
 	// Control sphere (will update its world matrix)
 	gTeapot->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
-
+	
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
 	/*static float rotate = 0.0f;
     static bool go = true;

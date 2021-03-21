@@ -1,11 +1,2 @@
-﻿  Camera.cpp
-  Direct3DSetup.cpp
-  Main.cpp
-  Mesh.cpp
-  Model.cpp
-  Scene.cpp
-  Shader.cpp
-  State.cpp
-  GraphicsHelpers.cpp
-  Generating Code...
+﻿  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\Sphere_ps.cso
   MatrixHierarchy.vcxproj -> C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\\CO2409Assignment.exe
