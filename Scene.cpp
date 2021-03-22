@@ -39,11 +39,13 @@ const float LIGHT_COLOUR_CHANGE = 0.3f;
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
 Mesh* gTeapotMesh;
 Mesh* gSphereMesh;
+Mesh* gCubeMesh;
 Mesh* gGroundMesh;
 Mesh* gLightMesh;
 
 Model* gTeapot;
 Model* gSphere;
+Model* gCube;
 Model* gGround;
 
 Camera* gCamera;
@@ -101,6 +103,12 @@ ID3D11ShaderResourceView* gTeapotDiffuseSpecularMapSRV = nullptr; // This object
 ID3D11Resource*           gSphereDiffuseSpecularMap = nullptr;
 ID3D11ShaderResourceView* gSphereDiffuseSpecularMapSRV = nullptr;
 
+ID3D11Resource*           gCubeDiffuseSpecularMap1 = nullptr;
+ID3D11ShaderResourceView* gCubeDiffuseSpecularMapSRV1 = nullptr;
+
+ID3D11Resource*           gCubeDiffuseSpecularMap2 = nullptr;
+ID3D11ShaderResourceView* gCubeDiffuseSpecularMapSRV2 = nullptr;
+
 ID3D11Resource*           gGroundDiffuseSpecularMap    = nullptr;
 ID3D11ShaderResourceView* gGroundDiffuseSpecularMapSRV = nullptr;
 
@@ -123,6 +131,7 @@ bool InitGeometry()
     {
 		gTeapotMesh	  = new Mesh("Teapot.x");
 		gSphereMesh	  = new Mesh("Sphere.x");
+		gCubeMesh	  = new Mesh("Cube.x");
         gGroundMesh   = new Mesh("Hills.x");
         gLightMesh    = new Mesh("Light.x");
     }
@@ -161,6 +170,8 @@ bool InitGeometry()
     // The function will fill in these pointers with usable data. The variables used here are globals found near the top of the file.
     if (!LoadTexture("MetalDiffuseSpecular.dds", &gTeapotDiffuseSpecularMap, &gTeapotDiffuseSpecularMapSRV) ||
 		!LoadTexture("tiles1.jpg", &gSphereDiffuseSpecularMap, &gSphereDiffuseSpecularMapSRV) ||
+		!LoadTexture("brick1.jpg", &gCubeDiffuseSpecularMap1, &gCubeDiffuseSpecularMapSRV1) ||
+		!LoadTexture("wood2.jpg", &gCubeDiffuseSpecularMap2, &gCubeDiffuseSpecularMapSRV2) ||
         !LoadTexture("GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
         !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
     {
@@ -188,6 +199,7 @@ bool InitScene()
 
 	gTeapot = new Model(gTeapotMesh);
 	gSphere = new Model(gSphereMesh);
+	gCube   = new Model(gCubeMesh);
     gGround   = new Model(gGroundMesh);
 
 
@@ -196,6 +208,8 @@ bool InitScene()
 	gTeapot->SetScale(1.5f);
 
 	gSphere->SetPosition({ 0.0f, 20.0f, 50.0f });
+
+	gCube->SetPosition({ 50.0f, 30.0f, 10.0f });
 
     // Light set-up - using an array this time
     for (int i = 0; i < NUM_LIGHTS; ++i)
@@ -236,6 +250,10 @@ void ReleaseResources()
     if (gTeapotDiffuseSpecularMap)    gTeapotDiffuseSpecularMap->Release();
 	if (gSphereDiffuseSpecularMapSRV) gSphereDiffuseSpecularMapSRV->Release();
 	if (gSphereDiffuseSpecularMap)    gSphereDiffuseSpecularMap->Release();
+	if (gCubeDiffuseSpecularMapSRV1) gCubeDiffuseSpecularMapSRV1->Release();
+	if (gCubeDiffuseSpecularMap1)    gCubeDiffuseSpecularMap1->Release();
+	if (gCubeDiffuseSpecularMapSRV2) gCubeDiffuseSpecularMapSRV2->Release();
+	if (gCubeDiffuseSpecularMap2)    gCubeDiffuseSpecularMap2->Release();
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -251,11 +269,13 @@ void ReleaseResources()
     delete gGround;    gGround    = nullptr;
 	delete gTeapot;	   gTeapot    = nullptr;
 	delete gSphere;	   gSphere    = nullptr;
+	delete gCube;	   gCube	  = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
 	delete gTeapotMesh;    gTeapotMesh    = nullptr;
 	delete gSphereMesh;	   gSphere		  = nullptr;
+	delete gCubeMesh;	   gCube		  = nullptr;
 }
 
 
@@ -301,6 +321,10 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->PSSetShaderResources(0, 1, &gTeapotDiffuseSpecularMapSRV); 
     gTeapot->Render();
 
+	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
+	gD3DContext->PSSetShaderResources(0, 1, &gCubeDiffuseSpecularMapSRV1);
+	gD3DContext->PSSetShaderResources(1, 1, &gCubeDiffuseSpecularMapSRV2);
+	gCube->Render();
 
 	// Select which shaders to use next
 	gD3DContext->VSSetShader(gWiggleVertexShader, nullptr, 0);

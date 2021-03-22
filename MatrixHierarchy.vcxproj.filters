@@ -97,5 +97,8 @@
     <FxCompile Include="Sphere_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Cube_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

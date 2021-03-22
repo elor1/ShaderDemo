@@ -21,6 +21,7 @@ ID3D11VertexShader* gBasicTransformVertexShader = nullptr;
 ID3D11PixelShader*  gLightModelPixelShader  = nullptr;
 ID3D11VertexShader* gWiggleVertexShader = nullptr;
 ID3D11PixelShader*  gSpherePixelShader = nullptr;
+ID3D11PixelShader* gFadeTexturePixelShader = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -39,10 +40,12 @@ bool LoadShaders()
     gLightModelPixelShader      = LoadPixelShader ("LightModel_ps");
 	gWiggleVertexShader = LoadVertexShader("Sphere_vs");
 	gSpherePixelShader = LoadPixelShader("Sphere_ps");
+	gFadeTexturePixelShader = LoadPixelShader("Cube_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr ||
-		gWiggleVertexShader == nullptr || gSpherePixelShader == nullptr)
+		gWiggleVertexShader == nullptr || gSpherePixelShader == nullptr ||
+		gFadeTexturePixelShader == nullptr)
     {
         gLastError = "Error loading shaders";
         return false;
@@ -60,6 +63,7 @@ void ReleaseShaders()
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
 	if (gSpherePixelShader)			  gSpherePixelShader->Release();
 	if (gWiggleVertexShader)		  gWiggleVertexShader->Release();
+	if (gFadeTexturePixelShader)	  gFadeTexturePixelShader->Release();
 }
 
 

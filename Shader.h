@@ -21,6 +21,7 @@ extern ID3D11VertexShader* gBasicTransformVertexShader;
 extern ID3D11PixelShader*  gLightModelPixelShader;
 extern ID3D11VertexShader* gWiggleVertexShader;
 extern ID3D11PixelShader*  gSpherePixelShader;
+extern ID3D11PixelShader*  gFadeTexturePixelShader;
 
 
 //--------------------------------------------------------------------------------------
