@@ -76,7 +76,6 @@ cbuffer PerFrameConstants : register(b0) // The b0 gives this constant buffer th
     float3   gCameraPosition;
     float    padding5;
 
-	float gWiggle;
 	float gTime;
 }
 // Note constant buffers are not structs: we don't use the name of the constant buffer, these are really just a collection of global variables (hence the 'g')

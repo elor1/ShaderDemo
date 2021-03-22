@@ -78,7 +78,6 @@ struct PerFrameConstants
     CVector3   cameraPosition;
     float      padding5;
 
-	float gWiggle;
 	float gTime;
 };
 

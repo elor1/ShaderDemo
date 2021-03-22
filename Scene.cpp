@@ -33,7 +33,6 @@
 // Constants controlling speed of movement/rotation (measured in units per second because we're using frame time)
 const float ROTATION_SPEED = 2.0f;  // 2 radians per second for rotation
 const float MOVEMENT_SPEED = 50.0f; // 50 units per second for movement (what a unit of length is depends on 3D model - i.e. an artist decision usually)
-const float LIGHT_STRENGTH_CHANGE = 0.1f;
 const float MAX_LIGHT_STRENGTH = 40.0f;
 const float LIGHT_COLOUR_CHANGE = 0.3f;
 
@@ -57,7 +56,6 @@ struct Light
     Model*   model;
     CVector3 colour;
     float    strength;
-	bool	 increaseStrength;
 };
 Light gLights[NUM_LIGHTS]; 
 
@@ -209,13 +207,11 @@ bool InitScene()
     gLights[0].strength = MAX_LIGHT_STRENGTH;
     gLights[0].model->SetPosition({ 30, 20, 0 });
     gLights[0].model->SetScale(pow(gLights[0].strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
-	gLights[0].increaseStrength = false;
 
     gLights[1].colour = { 1.0f, 0.8f, 0.2f };
     gLights[1].strength = MAX_LIGHT_STRENGTH;
     gLights[1].model->SetPosition({ -20, 50, 20 });
     gLights[1].model->SetScale(pow(gLights[1].strength, 0.7f));
-	gLights[1].increaseStrength = false;
 
     //// Set up camera ////
 
@@ -396,7 +392,6 @@ void RenderScene()
 void UpdateScene(float frameTime)
 {
 	gPerFrameConstants.gTime += frameTime;
-	gPerFrameConstants.gWiggle += 10 * frameTime;
 	
 	// Control sphere (will update its world matrix)
 	gTeapot->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
@@ -408,28 +403,8 @@ void UpdateScene(float frameTime)
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;*/
 
-	if (gLights[0].increaseStrength)
-	{
-		if (gLights[0].strength < MAX_LIGHT_STRENGTH)
-		{
-			gLights->strength += LIGHT_STRENGTH_CHANGE;
-		}
-		else
-		{
-			gLights[0].increaseStrength = false;
-		}
-	}
-	else
-	{
-		if (gLights[0].strength > 0)
-		{
-			gLights->strength -= LIGHT_STRENGTH_CHANGE;
-		}
-		else
-		{
-			gLights[0].increaseStrength = true;
-		}
-	}
+
+	gLights[0].strength = abs(sin(gPerFrameConstants.gTime)) * MAX_LIGHT_STRENGTH;
 
 	CVector3 HSLColour = RGBToHSL(gLights[1].colour);
 	HSLColour.x += LIGHT_COLOUR_CHANGE;

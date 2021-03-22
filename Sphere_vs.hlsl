@@ -17,6 +17,7 @@
 SimplePixelShaderInput main(BasicVertex modelVertex)
 {
 	SimplePixelShaderInput output; // This is the data the pixel shader requires from this vertex shader
+	const float WIGGLE_MULTIPLIER = 10.0f;
 
 	// Input position is x,y,z only - need a 4th element to multiply by a 4x4 matrix. Use 1 for a point (0 for a vector) - recall lectures
 	float4 modelPosition = float4(modelVertex.position, 1);
@@ -28,9 +29,9 @@ SimplePixelShaderInput main(BasicVertex modelVertex)
 	float4 worldNormal = mul(gWorldMatrix, modelNormal);
 	worldNormal = normalize(worldNormal);
 
-	worldPosition.x += sin(modelPosition.y + gWiggle) * 0.1f;
-	worldPosition.y += sin(modelPosition.x + gWiggle) * 0.1f;
-	worldPosition += worldNormal * (sin(gWiggle) + 1.0f) * 0.1f;
+	worldPosition.x += sin(modelPosition.y + (gTime * WIGGLE_MULTIPLIER)) * 0.1f;
+	worldPosition.y += sin(modelPosition.x + (gTime * WIGGLE_MULTIPLIER)) * 0.1f;
+	worldPosition += worldNormal * (sin(gTime * WIGGLE_MULTIPLIER) + 1.0f) * 0.1f;
 
 	// In a similar way use the view matrix to transform the vertex from world space into view space (camera's point of view)
 	// and then use the projection matrix to transform the vertex to 2D projection space
