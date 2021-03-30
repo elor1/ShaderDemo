@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
+#include "Light.h"
+
 //--------------------------------------------------------------------------------------
 // Scene Data
 //--------------------------------------------------------------------------------------
@@ -57,13 +59,7 @@ Camera* gCamera;
 
 // Store lights in an array in this exercise
 const int NUM_LIGHTS = 2;
-struct Light
-{
-    Model*   model;
-    CVector3 colour;
-    float    strength;
-};
-Light gLights[NUM_LIGHTS]; 
+Light* gLights[NUM_LIGHTS]; 
 
 
 // Additional light information
@@ -101,7 +97,8 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 //--------------------------------------------------------------------------------------
 
 // DirectX objects controlling textures used in this lab
-Texture* gTextures[6];
+const int NUM_TEXTURES = 6;
+Texture* gTextures[NUM_TEXTURES];
 
 
 //--------------------------------------------------------------------------------------
@@ -193,7 +190,7 @@ bool InitScene()
 	gTeapot = new Model(gTeapotMesh);
 	gSphere = new Model(gSphereMesh);
 	gCube   = new Model(gCubeMesh);
-    gGround   = new Model(gGroundMesh);
+    gGround = new Model(gGroundMesh);
 
 
 	// Initial positions
@@ -205,20 +202,21 @@ bool InitScene()
 	gCube->SetPosition({ 50.0f, 30.0f, 10.0f });
 
     // Light set-up - using an array this time
-    for (int i = 0; i < NUM_LIGHTS; ++i)
+	
+    for (int i = 0; i < NUM_LIGHTS; i++)
     {
-        gLights[i].model = new Model(gLightMesh);
+		gLights[i] = new Light();
+		gLights[i]->model = new Model(gLightMesh);
     }
 
-    gLights[0].colour = { 0.8f, 0.8f, 1.0f };
-    gLights[0].strength = MAX_LIGHT_STRENGTH;
-    gLights[0].model->SetPosition({ 30, 20, 0 });
-    gLights[0].model->SetScale(pow(gLights[0].strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    gLights[0]->colour = { 0.8f, 0.8f, 1.0f };
+    gLights[0]->strength = MAX_LIGHT_STRENGTH;
+    gLights[0]->model->SetPosition({ 30, 20, 0 });
 
-    gLights[1].colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1].strength = MAX_LIGHT_STRENGTH;
-    gLights[1].model->SetPosition({ -20, 50, 20 });
-    gLights[1].model->SetScale(pow(gLights[1].strength, 0.7f));
+    gLights[1]->colour = { 1.0f, 0.8f, 0.2f };
+    gLights[1]->strength = MAX_LIGHT_STRENGTH;
+    gLights[1]->model->SetPosition({ -20, 50, 20 });
+    gLights[1]->model->SetScale(pow(gLights[1]->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
 
     //// Set up camera ////
 
@@ -242,8 +240,7 @@ void ReleaseResources()
 			texture->diffuseSpecularMap->Release();
 			texture->diffuseSpecularMapSRV->Release();
 		}
-		delete texture;
-		texture = nullptr;
+		delete texture;    texture = nullptr;
 	}
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
@@ -253,10 +250,16 @@ void ReleaseResources()
 
     // See note in InitGeometry about why we're not using unique_ptr and having to manually delete
 	
-    for (int i = 0; i < NUM_LIGHTS; ++i)
+   /* for (int i = 0; i < NUM_LIGHTS; ++i)
     {
-        delete gLights[i].model;  gLights[i].model = nullptr;
-    }
+        delete gLights[i]->model;  gLights[i]->model = nullptr;
+    }*/
+
+	for (auto light : gLights)
+	{
+		delete light;	light = nullptr;
+	}
+	
     delete gCamera;    gCamera    = nullptr;
     delete gGround;    gGround    = nullptr;
 	delete gTeapot;	   gTeapot    = nullptr;
@@ -342,8 +345,8 @@ void RenderSceneFromCamera(Camera* camera)
     // Render all the lights in the array
     for (int i = 0; i < NUM_LIGHTS; ++i)
     {
-        gPerModelConstants.objectColour = gLights[i].colour; // Set any per-model constants apart from the world matrix just before calling render (light colour here)
-        gLights[i].model->Render();
+        gPerModelConstants.objectColour = gLights[i]->colour; // Set any per-model constants apart from the world matrix just before calling render (light colour here)
+        gLights[i]->model->Render();
     }
 }
 
@@ -357,10 +360,10 @@ void RenderScene()
 
     // Set up the light information in the constant buffer
     // Don't send to the GPU yet, the function RenderSceneFromCamera will do that
-    gPerFrameConstants.light1Colour   = gLights[0].colour * gLights[0].strength;
-    gPerFrameConstants.light1Position = gLights[0].model->Position();
-    gPerFrameConstants.light2Colour   = gLights[1].colour * gLights[1].strength;
-    gPerFrameConstants.light2Position = gLights[1].model->Position();
+    gPerFrameConstants.light1Colour   = gLights[0]->colour * gLights[0]->strength;
+    gPerFrameConstants.light1Position = gLights[0]->model->Position();
+    gPerFrameConstants.light2Colour   = gLights[1]->colour * gLights[1]->strength;
+    gPerFrameConstants.light2Position = gLights[1]->model->Position();
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
@@ -420,16 +423,17 @@ void UpdateScene(float frameTime)
     if (KeyHit(Key_1))  go = !go;*/
 
 	//Update 1st light's strength
-	gLights[0].strength = abs(sin(gPerFrameConstants.gTime)) * MAX_LIGHT_STRENGTH;
+	gLights[0]->strength = abs(sin(gPerFrameConstants.gTime)) * MAX_LIGHT_STRENGTH;
+	gLights[0]->model->SetScale(pow(gLights[0]->strength, 0.7f));
 
 	//Update 2nd light's colour
-	CVector3 HSLColour = RGBToHSL(gLights[1].colour);
+	CVector3 HSLColour = RGBToHSL(gLights[1]->colour);
 	HSLColour.x += LIGHT_COLOUR_CHANGE;
 	if (HSLColour.x >= 360.0f)
 	{
 		HSLColour.x = 0.0f;
 	}
-	gLights[1].colour = HSLToRGB(HSLColour);
+	gLights[1]->colour = HSLToRGB(HSLColour);
 	
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
