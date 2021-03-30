@@ -6,21 +6,20 @@ Texture2D DiffuseSpecularMap1 : register(t0); // Textures here can contain a dif
 Texture2D DiffuseSpecularMap2 : register(t1);
 SamplerState TexSampler      : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic - this is the sampler used for the texture above
 
-
 //--------------------------------------------------------------------------------------
 // Shader code
 //--------------------------------------------------------------------------------------
 
 // Pixel shader entry point - each shader has a "main" function
 // This shader just samples a diffuse texture map
-float4 main(SimplePixelShaderInput input) : SV_Target
+float4 main(LightingPixelShaderInput input) : SV_Target
 {
 float4 texture1Colour = DiffuseSpecularMap1.Sample(TexSampler, input.uv);
 float4 texture2Colour = DiffuseSpecularMap2.Sample(TexSampler, input.uv);
 
 float lerpValue = 0.5f * (sin(gTime)) + 0.5f;
 	
-// Combine texture with tint colour
+//Combine texture colours
 float4 finalColour = lerp(texture1Colour, texture2Colour, lerpValue);
 
 return finalColour; // Always use 1.0f for output alpha - no alpha blending in this lab

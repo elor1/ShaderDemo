@@ -317,7 +317,7 @@ void RenderSceneFromCamera(Camera* camera)
     // the Mesh render function, which will set up vertex & index buffer before finally calling Draw on the GPU
     gGround->Render();
 
-    // Render other lit models, only change textures for each onee
+    // Render other lit models, only change textures for each one
     gD3DContext->PSSetShaderResources(0, 1, &gTeapotDiffuseSpecularMapSRV); 
     gTeapot->Render();
 
@@ -427,9 +427,10 @@ void UpdateScene(float frameTime)
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;*/
 
-
+	//Update 1st light's strength
 	gLights[0].strength = abs(sin(gPerFrameConstants.gTime)) * MAX_LIGHT_STRENGTH;
 
+	//Update 2nd light's colour
 	CVector3 HSLColour = RGBToHSL(gLights[1].colour);
 	HSLColour.x += LIGHT_COLOUR_CHANGE;
 	if (HSLColour.x >= 360.0f)
@@ -437,7 +438,6 @@ void UpdateScene(float frameTime)
 		HSLColour.x = 0.0f;
 	}
 	gLights[1].colour = HSLToRGB(HSLColour);
-	
 	
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
