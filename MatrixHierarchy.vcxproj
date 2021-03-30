@@ -175,6 +175,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="State.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Utility\Input.cpp" />
     <ClCompile Include="Utility\GraphicsHelpers.cpp" />
     <ClCompile Include="Utility\Timer.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="State.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Utility\ColourRGBA.h" />
     <ClInclude Include="Utility\Input.h" />
     <ClInclude Include="Utility\GraphicsHelpers.h" />

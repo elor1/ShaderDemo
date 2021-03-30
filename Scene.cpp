@@ -23,6 +23,10 @@
 #include <sstream>
 #include <memory>
 
+#include "Texture.h"
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 
 //--------------------------------------------------------------------------------------
 // Scene Data
@@ -97,24 +101,7 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 //--------------------------------------------------------------------------------------
 
 // DirectX objects controlling textures used in this lab
-ID3D11Resource*           gTeapotDiffuseSpecularMap    = nullptr; // This object represents the memory used by the texture on the GPU
-ID3D11ShaderResourceView* gTeapotDiffuseSpecularMapSRV = nullptr; // This object is used to give shaders access to the texture above (SRV = shader resource view)
-
-ID3D11Resource*           gSphereDiffuseSpecularMap = nullptr;
-ID3D11ShaderResourceView* gSphereDiffuseSpecularMapSRV = nullptr;
-
-ID3D11Resource*           gCubeDiffuseSpecularMap1 = nullptr;
-ID3D11ShaderResourceView* gCubeDiffuseSpecularMapSRV1 = nullptr;
-
-ID3D11Resource*           gCubeDiffuseSpecularMap2 = nullptr;
-ID3D11ShaderResourceView* gCubeDiffuseSpecularMapSRV2 = nullptr;
-
-ID3D11Resource*           gGroundDiffuseSpecularMap    = nullptr;
-ID3D11ShaderResourceView* gGroundDiffuseSpecularMapSRV = nullptr;
-
-ID3D11Resource*           gLightDiffuseMap    = nullptr;
-ID3D11ShaderResourceView* gLightDiffuseMapSRV = nullptr;
-
+Texture* gTextures[6];
 
 
 //--------------------------------------------------------------------------------------
@@ -125,6 +112,8 @@ ID3D11ShaderResourceView* gLightDiffuseMapSRV = nullptr;
 // Returns true on success
 bool InitGeometry()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	
     // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
     // IMPORTANT NOTE: Will only keep the first object from the mesh - multipart objects will have parts missing - see later lab for more robust loader
     try 
@@ -161,6 +150,12 @@ bool InitGeometry()
         return false;
     }
 
+	gTextures[0] = new Texture("MetalDiffuseSpecular.dds");
+	gTextures[1] = new Texture("tiles1.jpg");
+	gTextures[2] = new Texture("brick1.jpg");
+	gTextures[3] = new Texture("wood2.jpg");
+	gTextures[4] = new Texture("GrassDiffuseSpecular.dds");
+	gTextures[5] = new Texture("Flare.jpg");
 
     //// Load / prepare textures on the GPU ////
 
@@ -168,16 +163,14 @@ bool InitGeometry()
     // The LoadTexture function requires you to pass a ID3D11Resource* (e.g. &gCubeDiffuseMap), which manages the GPU memory for the
     // texture and also a ID3D11ShaderResourceView* (e.g. &gCubeDiffuseMapSRV), which allows us to use the texture in shaders
     // The function will fill in these pointers with usable data. The variables used here are globals found near the top of the file.
-    if (!LoadTexture("MetalDiffuseSpecular.dds", &gTeapotDiffuseSpecularMap, &gTeapotDiffuseSpecularMapSRV) ||
-		!LoadTexture("tiles1.jpg", &gSphereDiffuseSpecularMap, &gSphereDiffuseSpecularMapSRV) ||
-		!LoadTexture("brick1.jpg", &gCubeDiffuseSpecularMap1, &gCubeDiffuseSpecularMapSRV1) ||
-		!LoadTexture("wood2.jpg", &gCubeDiffuseSpecularMap2, &gCubeDiffuseSpecularMapSRV2) ||
-        !LoadTexture("GrassDiffuseSpecular.dds", &gGroundDiffuseSpecularMap,    &gGroundDiffuseSpecularMapSRV   ) ||
-        !LoadTexture("Flare.jpg",                &gLightDiffuseMap,             &gLightDiffuseMapSRV))
-    {
-        gLastError = "Error loading textures";
-        return false;
-    }
+	for (auto texture : gTextures)
+	{
+		if (!texture->Load())
+		{
+			return false;
+		}
+	}
+   
 
 
   	// Create all filtering modes, blending modes etc. used by the app (see State.cpp/.h)
@@ -242,18 +235,16 @@ void ReleaseResources()
 {
     ReleaseStates();
 
-    if (gLightDiffuseMapSRV)             gLightDiffuseMapSRV->Release();
-    if (gLightDiffuseMap)                gLightDiffuseMap->Release();
-    if (gGroundDiffuseSpecularMapSRV)    gGroundDiffuseSpecularMapSRV->Release();
-    if (gGroundDiffuseSpecularMap)       gGroundDiffuseSpecularMap->Release();
-    if (gTeapotDiffuseSpecularMapSRV) gTeapotDiffuseSpecularMapSRV->Release();
-    if (gTeapotDiffuseSpecularMap)    gTeapotDiffuseSpecularMap->Release();
-	if (gSphereDiffuseSpecularMapSRV) gSphereDiffuseSpecularMapSRV->Release();
-	if (gSphereDiffuseSpecularMap)    gSphereDiffuseSpecularMap->Release();
-	if (gCubeDiffuseSpecularMapSRV1) gCubeDiffuseSpecularMapSRV1->Release();
-	if (gCubeDiffuseSpecularMap1)    gCubeDiffuseSpecularMap1->Release();
-	if (gCubeDiffuseSpecularMapSRV2) gCubeDiffuseSpecularMapSRV2->Release();
-	if (gCubeDiffuseSpecularMap2)    gCubeDiffuseSpecularMap2->Release();
+	for (auto texture : gTextures)
+	{
+		if (texture)
+		{
+			texture->diffuseSpecularMap->Release();
+			texture->diffuseSpecularMapSRV->Release();
+		}
+		delete texture;
+		texture = nullptr;
+	}
 
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
@@ -261,6 +252,7 @@ void ReleaseResources()
     ReleaseShaders();
 
     // See note in InitGeometry about why we're not using unique_ptr and having to manually delete
+	
     for (int i = 0; i < NUM_LIGHTS; ++i)
     {
         delete gLights[i].model;  gLights[i].model = nullptr;
@@ -310,7 +302,7 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->RSSetState(gCullBackState);
 
     // Select the approriate textures and sampler to use in the pixel shader
-    gD3DContext->PSSetShaderResources(0, 1, &gGroundDiffuseSpecularMapSRV); // First parameter must match texture slot number in the shader
+    gD3DContext->PSSetShaderResources(0, 1, &gTextures[4]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shader
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
     // Render model - it will update the model's world matrix and send it to the GPU in a constant buffer, then it will call
@@ -318,18 +310,18 @@ void RenderSceneFromCamera(Camera* camera)
     gGround->Render();
 
     // Render other lit models, only change textures for each one
-    gD3DContext->PSSetShaderResources(0, 1, &gTeapotDiffuseSpecularMapSRV); 
+    gD3DContext->PSSetShaderResources(0, 1, &gTextures[0]->diffuseSpecularMapSRV);
     gTeapot->Render();
 
 	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gCubeDiffuseSpecularMapSRV1);
-	gD3DContext->PSSetShaderResources(1, 1, &gCubeDiffuseSpecularMapSRV2);
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[2]->diffuseSpecularMapSRV);
+	gD3DContext->PSSetShaderResources(1, 1, &gTextures[3]->diffuseSpecularMapSRV);
 	gCube->Render();
 
 	// Select which shaders to use next
 	gD3DContext->VSSetShader(gWiggleVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gSpherePixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gSphereDiffuseSpecularMapSRV);
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[1]->diffuseSpecularMapSRV);
 	gSphere->Render();
 
     //// Render lights ////
@@ -339,7 +331,7 @@ void RenderSceneFromCamera(Camera* camera)
 	gD3DContext->PSSetShader(gLightModelPixelShader, nullptr, 0);
 
     // Select the texture and sampler to use in the pixel shader
-    gD3DContext->PSSetShaderResources(0, 1, &gLightDiffuseMapSRV); // First parameter must match texture slot number in the shaer
+    gD3DContext->PSSetShaderResources(0, 1, &gTextures[5]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
     // States - additive blending, read-only depth buffer and no culling (standard set-up for blending
