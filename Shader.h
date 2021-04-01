@@ -24,6 +24,7 @@ extern ID3D11PixelShader*  gSpherePixelShader;
 extern ID3D11PixelShader*  gFadeTexturePixelShader;
 extern ID3D11VertexShader* gNormalMappingVertexShader;
 extern ID3D11PixelShader* gNormalMappingPixelShader;
+extern ID3D11PixelShader* gParallaxMappingPixelShader;
 
 
 //--------------------------------------------------------------------------------------

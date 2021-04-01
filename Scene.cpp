@@ -99,7 +99,7 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 //--------------------------------------------------------------------------------------
 
 // DirectX objects controlling textures used in this lab
-const int NUM_TEXTURES = 8;
+const int NUM_TEXTURES = 9;
 Texture* gTextures[NUM_TEXTURES];
 
 
@@ -120,7 +120,7 @@ bool InitGeometry()
 		gTeapotMesh	  = new Mesh("Teapot.x");
 		gSphereMesh	  = new Mesh("Sphere.x");
 		gCubeMesh	  = new Mesh("Cube.x");
-        gGroundMesh   = new Mesh("Hills.x");
+        gGroundMesh   = new Mesh("Hills.x", true);
         gLightMesh    = new Mesh("Light.x");
 		gCubeTangentMesh = new Mesh("Cube.x", true);
     }
@@ -154,10 +154,11 @@ bool InitGeometry()
 	gTextures[1] = new Texture("tiles1.jpg");
 	gTextures[2] = new Texture("brick1.jpg");
 	gTextures[3] = new Texture("wood2.jpg");
-	gTextures[4] = new Texture("GrassDiffuseSpecular.dds");
+	gTextures[4] = new Texture("CobbleDiffuseSpecular.dds");
 	gTextures[5] = new Texture("Flare.jpg");
 	gTextures[6] = new Texture("PatternDiffuseSpecular.dds");
 	gTextures[7] = new Texture("PatternNormal.dds");
+	gTextures[8] = new Texture("CobbleNormalHeight.dds");
 	
 
     //// Load / prepare textures on the GPU ////
@@ -317,16 +318,21 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->RSSetState(gCullBackState);
 
     // Select the approriate textures and sampler to use in the pixel shader
-    gD3DContext->PSSetShaderResources(0, 1, &gTextures[4]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shader
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[0]->diffuseSpecularMapSRV);
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
     // Render model - it will update the model's world matrix and send it to the GPU in a constant buffer, then it will call
     // the Mesh render function, which will set up vertex & index buffer before finally calling Draw on the GPU
-    gGround->Render();
+
+	gTeapot->Render();
+    
 
     // Render other lit models, only change textures for each one
-    gD3DContext->PSSetShaderResources(0, 1, &gTextures[0]->diffuseSpecularMapSRV);
-    gTeapot->Render();
+	gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
+	gD3DContext->PSSetShader(gParallaxMappingPixelShader, nullptr, 0);
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[4]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shader
+	gD3DContext->PSSetShaderResources(1, 1, &gTextures[8]->diffuseSpecularMapSRV);
+	gGround->Render();
 
 	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[2]->diffuseSpecularMapSRV);
