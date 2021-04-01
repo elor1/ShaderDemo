@@ -48,11 +48,13 @@ Mesh* gSphereMesh;
 Mesh* gCubeMesh;
 Mesh* gGroundMesh;
 Mesh* gLightMesh;
+Mesh* gCubeTangentMesh;
 
 Model* gTeapot;
 Model* gSphere;
 Model* gCube;
 Model* gGround;
+Model* gCube2;
 
 Camera* gCamera;
 
@@ -97,7 +99,7 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 //--------------------------------------------------------------------------------------
 
 // DirectX objects controlling textures used in this lab
-const int NUM_TEXTURES = 6;
+const int NUM_TEXTURES = 8;
 Texture* gTextures[NUM_TEXTURES];
 
 
@@ -120,6 +122,7 @@ bool InitGeometry()
 		gCubeMesh	  = new Mesh("Cube.x");
         gGroundMesh   = new Mesh("Hills.x");
         gLightMesh    = new Mesh("Light.x");
+		gCubeTangentMesh = new Mesh("Cube.x", true);
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -153,6 +156,9 @@ bool InitGeometry()
 	gTextures[3] = new Texture("wood2.jpg");
 	gTextures[4] = new Texture("GrassDiffuseSpecular.dds");
 	gTextures[5] = new Texture("Flare.jpg");
+	gTextures[6] = new Texture("PatternDiffuseSpecular.dds");
+	gTextures[7] = new Texture("PatternNormal.dds");
+	
 
     //// Load / prepare textures on the GPU ////
 
@@ -191,6 +197,7 @@ bool InitScene()
 	gSphere = new Model(gSphereMesh);
 	gCube   = new Model(gCubeMesh);
     gGround = new Model(gGroundMesh);
+	gCube2  = new Model(gCubeTangentMesh);
 
 
 	// Initial positions
@@ -200,6 +207,9 @@ bool InitScene()
 	gSphere->SetPosition({ 0.0f, 20.0f, 50.0f });
 
 	gCube->SetPosition({ 50.0f, 30.0f, 10.0f });
+
+	gCube2->SetPosition({ 60.0f, 10.0f,-20.0f });
+	gCube2->SetScale(1.5f);
 
     // Light set-up - using an array this time
 	
@@ -265,12 +275,14 @@ void ReleaseResources()
 	delete gTeapot;	   gTeapot    = nullptr;
 	delete gSphere;	   gSphere    = nullptr;
 	delete gCube;	   gCube	  = nullptr;
+	delete gCube2;	   gCube2	  = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
 	delete gTeapotMesh;    gTeapotMesh    = nullptr;
 	delete gSphereMesh;	   gSphere		  = nullptr;
 	delete gCubeMesh;	   gCube		  = nullptr;
+	delete gCubeTangentMesh;	   gCube2		  = nullptr;
 }
 
 
@@ -326,6 +338,13 @@ void RenderSceneFromCamera(Camera* camera)
 	gD3DContext->PSSetShader(gSpherePixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[1]->diffuseSpecularMapSRV);
 	gSphere->Render();
+
+	// Select which shaders to use next
+	gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
+	gD3DContext->PSSetShader(gNormalMappingPixelShader, nullptr, 0);
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[6]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
+	gD3DContext->PSSetShaderResources(1, 1, &gTextures[7]->diffuseSpecularMapSRV);
+	gCube2->Render();
 
     //// Render lights ////
 

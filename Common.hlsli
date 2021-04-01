@@ -16,6 +16,13 @@ struct BasicVertex
     float2 uv       : uv;
 };
 
+struct TangentVertex
+{
+	float3 position : position;
+	float3 normal   : normal;
+	float3 tangent  : tangent;
+	float2 uv       : uv;
+};
 
 // This structure describes what data the lighting pixel shader receives from the vertex shader.
 // The projected position is a required output from all vertex shaders - where the vertex is on the screen
@@ -42,6 +49,19 @@ struct SimplePixelShaderInput
 {
     float4 projectedPosition : SV_Position;
     float2 uv : uv;
+};
+
+struct NormalMappingPixelShaderInput
+{
+	float4 projectedPosition : SV_Position; // This is the position of the pixel to render, this is a required input
+											// to the pixel shader and so it uses the special semantic "SV_Position"
+											// because the shader needs to identify this important information
+
+	float3 worldPosition : worldPosition; // Data required for lighting calculations in the pixel shader
+	float3 modelNormal   : modelNormal;   // --"--
+	float3 modelTangent  : modelTangent;  // --"--
+
+	float2 uv : uv; // UVs are texture coordinates. The artist specifies for every vertex which point on the texture is "pinned" to that vertex.
 };
 
 //--------------------------------------------------------------------------------------

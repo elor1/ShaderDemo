@@ -22,6 +22,8 @@ ID3D11PixelShader*  gLightModelPixelShader  = nullptr;
 ID3D11VertexShader* gWiggleVertexShader = nullptr;
 ID3D11PixelShader*  gSpherePixelShader = nullptr;
 ID3D11PixelShader* gFadeTexturePixelShader = nullptr;
+ID3D11PixelShader* gNormalMappingPixelShader = nullptr;
+ID3D11VertexShader* gNormalMappingVertexShader = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -41,11 +43,14 @@ bool LoadShaders()
 	gWiggleVertexShader = LoadVertexShader("Sphere_vs");
 	gSpherePixelShader = LoadPixelShader("Sphere_ps");
 	gFadeTexturePixelShader = LoadPixelShader("Cube_ps");
+	gNormalMappingPixelShader = LoadPixelShader("NormalMapping_ps");
+	gNormalMappingVertexShader = LoadVertexShader("NormalMapping_vs");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr ||
 		gWiggleVertexShader == nullptr || gSpherePixelShader == nullptr ||
-		gFadeTexturePixelShader == nullptr)
+		gFadeTexturePixelShader == nullptr ||
+		gNormalMappingPixelShader == nullptr || gNormalMappingVertexShader == nullptr)
     {
         gLastError = "Error loading shaders";
         return false;
@@ -64,6 +69,8 @@ void ReleaseShaders()
 	if (gSpherePixelShader)			  gSpherePixelShader->Release();
 	if (gWiggleVertexShader)		  gWiggleVertexShader->Release();
 	if (gFadeTexturePixelShader)	  gFadeTexturePixelShader->Release();
+	if (gNormalMappingPixelShader)	  gNormalMappingPixelShader->Release();
+	if (gNormalMappingVertexShader)	  gNormalMappingVertexShader->Release();
 }
 
 
