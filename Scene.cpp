@@ -49,12 +49,15 @@ Mesh* gCubeMesh;
 Mesh* gGroundMesh;
 Mesh* gLightMesh;
 Mesh* gCubeTangentMesh;
+Mesh* gDecalMesh;
 
 Model* gTeapot;
 Model* gSphere;
 Model* gCube;
 Model* gGround;
 Model* gCube2;
+Model* gDecal;
+Model* gCube3;
 
 Camera* gCamera;
 
@@ -99,7 +102,7 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 //--------------------------------------------------------------------------------------
 
 // DirectX objects controlling textures used in this lab
-const int NUM_TEXTURES = 9;
+const int NUM_TEXTURES = 11;
 Texture* gTextures[NUM_TEXTURES];
 
 
@@ -123,6 +126,7 @@ bool InitGeometry()
         gGroundMesh   = new Mesh("Hills.x", true);
         gLightMesh    = new Mesh("Light.x");
 		gCubeTangentMesh = new Mesh("Cube.x", true);
+		gDecalMesh = new Mesh("Decal.x");
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -159,7 +163,8 @@ bool InitGeometry()
 	gTextures[6] = new Texture("PatternDiffuseSpecular.dds");
 	gTextures[7] = new Texture("PatternNormal.dds");
 	gTextures[8] = new Texture("CobbleNormalHeight.dds");
-	
+	gTextures[9] = new Texture("Moogle.png");
+	gTextures[10] = new Texture("StoneDiffuseSpecular.dds");
 
     //// Load / prepare textures on the GPU ////
 
@@ -199,18 +204,24 @@ bool InitScene()
 	gCube   = new Model(gCubeMesh);
     gGround = new Model(gGroundMesh);
 	gCube2  = new Model(gCubeTangentMesh);
-
+	gDecal  = new Model(gDecalMesh);
+	gCube3  = new Model(gCubeMesh);
 
 	// Initial positions
 	gTeapot->SetPosition({ 20.0f, 0.0f, 0.0f });
 	gTeapot->SetScale(1.5f);
 
-	gSphere->SetPosition({ 0.0f, 20.0f, 50.0f });
+	gSphere->SetPosition({ 15.0f, 20.0f, 50.0f });
 
-	gCube->SetPosition({ 50.0f, 30.0f, 10.0f });
+	gCube->SetPosition({ 50.0f, 10.0f, -40.0f });
 
-	gCube2->SetPosition({ 60.0f, 10.0f,-20.0f });
+	gCube2->SetPosition({ 50.0f, 10.0f,40.0f });
+	gCube2->SetRotation({ 0.0f, 45.0f, 0.0f });
 	gCube2->SetScale(1.5f);
+
+	gCube3->SetPosition({ -10.0f, 30.0f, 40.0f });
+	gDecal->SetPosition({ -10.0f, 30.0f, 39.9f });
+	
 
     // Light set-up - using an array this time
 	
@@ -218,21 +229,21 @@ bool InitScene()
     {
 		gLights[i] = new Light();
 		gLights[i]->model = new Model(gLightMesh);
+		gLights[i]->strength = MAX_LIGHT_STRENGTH;
+		gLights[i]->model->SetScale(pow(gLights[i]->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
     }
 
     gLights[0]->colour = { 0.8f, 0.8f, 1.0f };
-    gLights[0]->strength = MAX_LIGHT_STRENGTH;
     gLights[0]->model->SetPosition({ 30, 20, 0 });
 
     gLights[1]->colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1]->strength = MAX_LIGHT_STRENGTH;
     gLights[1]->model->SetPosition({ -20, 50, 20 });
-    gLights[1]->model->SetScale(pow(gLights[1]->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+    
 
     //// Set up camera ////
 
     gCamera = new Camera();
-    gCamera->SetPosition({ 15, 30,-70 });
+    gCamera->SetPosition({ 15, 30,-100 });
     gCamera->SetRotation({ ToRadians(13), 0, 0 });
 
     return true;
@@ -277,13 +288,16 @@ void ReleaseResources()
 	delete gSphere;	   gSphere    = nullptr;
 	delete gCube;	   gCube	  = nullptr;
 	delete gCube2;	   gCube2	  = nullptr;
+	delete gDecal;	   gDecal	  = nullptr;
+	delete gCube3;	   gCube3	  = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
 	delete gTeapotMesh;    gTeapotMesh    = nullptr;
-	delete gSphereMesh;	   gSphere		  = nullptr;
-	delete gCubeMesh;	   gCube		  = nullptr;
-	delete gCubeTangentMesh;	   gCube2		  = nullptr;
+	delete gSphereMesh;	   gSphereMesh		  = nullptr;
+	delete gCubeMesh;	   gCubeMesh		  = nullptr;
+	delete gCubeTangentMesh; gCubeTangentMesh = nullptr;
+	delete gDecalMesh;	   gDecalMesh	  = nullptr;
 }
 
 
@@ -325,8 +339,7 @@ void RenderSceneFromCamera(Camera* camera)
     // the Mesh render function, which will set up vertex & index buffer before finally calling Draw on the GPU
 
 	gTeapot->Render();
-    
-
+	
     // Render other lit models, only change textures for each one
 	gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gParallaxMappingPixelShader, nullptr, 0);
@@ -351,6 +364,16 @@ void RenderSceneFromCamera(Camera* camera)
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[6]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[7]->diffuseSpecularMapSRV);
 	gCube2->Render();
+
+	gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
+	gD3DContext->PSSetShader(gPixelLightingPixelShader, nullptr, 0);
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[10]->diffuseSpecularMapSRV);
+	gCube3->Render();
+
+	gD3DContext->PSSetShader(gTextureAlphaPixelShader, nullptr, 0);
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[9]->diffuseSpecularMapSRV);
+	gD3DContext->OMSetBlendState(gMultiplicativeBlendingState, nullptr, 0xffffff);
+	gDecal->Render();
 
     //// Render lights ////
 
@@ -443,7 +466,7 @@ void UpdateScene(float frameTime)
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
 	/*static float rotate = 0.0f;
     static bool go = true;
-	gLights[0].model->SetPosition( gTeapot->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
+	gLights[0]->model->SetPosition( gCube3->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;*/
 
