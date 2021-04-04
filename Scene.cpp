@@ -58,6 +58,7 @@ Model* gGround;
 Model* gCube2;
 Model* gDecal;
 Model* gCube3;
+Model* gDecal2;
 
 Camera* gCamera;
 
@@ -102,7 +103,7 @@ ID3D11Buffer*     gPerModelConstantBuffer; // --"--
 //--------------------------------------------------------------------------------------
 
 // DirectX objects controlling textures used in this lab
-const int NUM_TEXTURES = 11;
+const int NUM_TEXTURES = 12;
 Texture* gTextures[NUM_TEXTURES];
 
 
@@ -165,6 +166,7 @@ bool InitGeometry()
 	gTextures[8] = new Texture("CobbleNormalHeight.dds");
 	gTextures[9] = new Texture("Moogle.png");
 	gTextures[10] = new Texture("StoneDiffuseSpecular.dds");
+	gTextures[11] = new Texture("Cloud.png");
 
     //// Load / prepare textures on the GPU ////
 
@@ -197,15 +199,16 @@ bool InitGeometry()
 // Returns true on success
 bool InitScene()
 {
-    //// Set up scene ////
+	//// Set up scene ////
 
 	gTeapot = new Model(gTeapotMesh);
 	gSphere = new Model(gSphereMesh);
-	gCube   = new Model(gCubeMesh);
-    gGround = new Model(gGroundMesh);
-	gCube2  = new Model(gCubeTangentMesh);
-	gDecal  = new Model(gDecalMesh);
-	gCube3  = new Model(gCubeMesh);
+	gCube = new Model(gCubeMesh);
+	gGround = new Model(gGroundMesh);
+	gCube2 = new Model(gCubeTangentMesh);
+	gDecal = new Model(gDecalMesh);
+	gCube3 = new Model(gCubeMesh);
+	gDecal2 = new Model(gDecalMesh);
 
 	// Initial positions
 	gTeapot->SetPosition({ 20.0f, 0.0f, 0.0f });
@@ -214,6 +217,7 @@ bool InitScene()
 	gSphere->SetPosition({ 15.0f, 20.0f, 50.0f });
 
 	gCube->SetPosition({ 50.0f, 10.0f, -40.0f });
+	gDecal2->SetPosition({ 50.0f, 10.0f, -40.1f });
 
 	gCube2->SetPosition({ 50.0f, 10.0f,40.0f });
 	gCube2->SetRotation({ 0.0f, 45.0f, 0.0f });
@@ -221,7 +225,6 @@ bool InitScene()
 
 	gCube3->SetPosition({ -10.0f, 30.0f, 40.0f });
 	gDecal->SetPosition({ -10.0f, 30.0f, 39.9f });
-	
 
     // Light set-up - using an array this time
 	
@@ -243,7 +246,7 @@ bool InitScene()
     //// Set up camera ////
 
     gCamera = new Camera();
-    gCamera->SetPosition({ 15, 30,-100 });
+    gCamera->SetPosition({ 15, 50,-120 });
     gCamera->SetRotation({ ToRadians(13), 0, 0 });
 
     return true;
@@ -290,6 +293,7 @@ void ReleaseResources()
 	delete gCube2;	   gCube2	  = nullptr;
 	delete gDecal;	   gDecal	  = nullptr;
 	delete gCube3;	   gCube3	  = nullptr;
+	delete gDecal2;	   gDecal2	  = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
@@ -374,6 +378,12 @@ void RenderSceneFromCamera(Camera* camera)
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[9]->diffuseSpecularMapSRV);
 	gD3DContext->OMSetBlendState(gMultiplicativeBlendingState, nullptr, 0xffffff);
 	gDecal->Render();
+
+	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
+	gD3DContext->PSSetShaderResources(0, 1, &gTextures[11]->diffuseSpecularMapSRV);
+	gD3DContext->PSSetShaderResources(1, 1, &gTextures[11]->diffuseSpecularMapSRV);
+	gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
+	gDecal2->Render();
 
     //// Render lights ////
 
