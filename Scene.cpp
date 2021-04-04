@@ -51,14 +51,16 @@ Mesh* gLightMesh;
 Mesh* gCubeTangentMesh;
 Mesh* gDecalMesh;
 
+const int NUM_CUBES = 2;
+const int NUM_DECALS = 2;
 Model* gTeapot;
 Model* gSphere;
-Model* gCube;
+Model* gCube[NUM_CUBES];
 Model* gGround;
-Model* gCube2;
-Model* gDecal;
-Model* gCube3;
-Model* gDecal2;
+Model* gCubeTangent;
+Model* gDecal[NUM_DECALS];
+//Model* gCube3;
+//Model* gDecal2;
 
 Camera* gCamera;
 
@@ -203,12 +205,22 @@ bool InitScene()
 
 	gTeapot = new Model(gTeapotMesh);
 	gSphere = new Model(gSphereMesh);
-	gCube = new Model(gCubeMesh);
+	//gCube = new Model(gCubeMesh);
 	gGround = new Model(gGroundMesh);
-	gCube2 = new Model(gCubeTangentMesh);
-	gDecal = new Model(gDecalMesh);
-	gCube3 = new Model(gCubeMesh);
-	gDecal2 = new Model(gDecalMesh);
+	gCubeTangent = new Model(gCubeTangentMesh);
+	//gDecal = new Model(gDecalMesh);
+	//gCube3 = new Model(gCubeMesh);
+	//gDecal2 = new Model(gDecalMesh);
+
+	for (int i = 0; i < NUM_CUBES; i++)
+	{
+		gCube[i] = new Model(gCubeMesh);
+	}
+
+	for (int i = 0; i < NUM_DECALS; i++)
+	{
+		gDecal[i] = new Model(gDecalMesh);
+	}
 
 	// Initial positions
 	gTeapot->SetPosition({ 20.0f, 0.0f, 0.0f });
@@ -216,15 +228,15 @@ bool InitScene()
 
 	gSphere->SetPosition({ 15.0f, 20.0f, 50.0f });
 
-	gCube->SetPosition({ 50.0f, 10.0f, -40.0f });
-	gDecal2->SetPosition({ 50.0f, 10.0f, -40.1f });
+	gCube[0]->SetPosition({ 50.0f, 10.0f, -40.0f });
+	gDecal[1]->SetPosition({ 50.0f, 10.0f, -40.1f });
 
-	gCube2->SetPosition({ 50.0f, 10.0f,40.0f });
-	gCube2->SetRotation({ 0.0f, 45.0f, 0.0f });
-	gCube2->SetScale(1.5f);
+	gCubeTangent->SetPosition({ 50.0f, 10.0f,40.0f });
+	gCubeTangent->SetRotation({ 0.0f, 45.0f, 0.0f });
+	gCubeTangent->SetScale(1.5f);
 
-	gCube3->SetPosition({ -10.0f, 30.0f, 40.0f });
-	gDecal->SetPosition({ -10.0f, 30.0f, 39.9f });
+	gCube[1]->SetPosition({ -10.0f, 30.0f, 40.0f });
+	gDecal[0]->SetPosition({ -10.0f, 30.0f, 39.9f });
 
     // Light set-up - using an array this time
 	
@@ -284,16 +296,22 @@ void ReleaseResources()
 	{
 		delete light;	light = nullptr;
 	}
+
+	for (auto cube : gCube)
+	{
+		delete cube;	cube = nullptr;
+	}
+
+	for (auto decal : gDecal)
+	{
+		delete decal;	decal = nullptr;
+	}
 	
     delete gCamera;    gCamera    = nullptr;
     delete gGround;    gGround    = nullptr;
 	delete gTeapot;	   gTeapot    = nullptr;
 	delete gSphere;	   gSphere    = nullptr;
-	delete gCube;	   gCube	  = nullptr;
-	delete gCube2;	   gCube2	  = nullptr;
-	delete gDecal;	   gDecal	  = nullptr;
-	delete gCube3;	   gCube3	  = nullptr;
-	delete gDecal2;	   gDecal2	  = nullptr;
+	delete gCubeTangent;	   gCubeTangent	  = nullptr;
 
     delete gLightMesh;     gLightMesh     = nullptr;
     delete gGroundMesh;    gGroundMesh    = nullptr;
@@ -354,7 +372,7 @@ void RenderSceneFromCamera(Camera* camera)
 	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[2]->diffuseSpecularMapSRV);
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[3]->diffuseSpecularMapSRV);
-	gCube->Render();
+	gCube[0]->Render();
 
 	// Select which shaders to use next
 	gD3DContext->VSSetShader(gWiggleVertexShader, nullptr, 0);
@@ -367,23 +385,23 @@ void RenderSceneFromCamera(Camera* camera)
 	gD3DContext->PSSetShader(gNormalMappingPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[6]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[7]->diffuseSpecularMapSRV);
-	gCube2->Render();
+	gCubeTangent->Render();
 
 	gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gPixelLightingPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[10]->diffuseSpecularMapSRV);
-	gCube3->Render();
+	gCube[1]->Render();
 
 	gD3DContext->PSSetShader(gTextureAlphaPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[9]->diffuseSpecularMapSRV);
 	gD3DContext->OMSetBlendState(gMultiplicativeBlendingState, nullptr, 0xffffff);
-	gDecal->Render();
+	gDecal[0]->Render();
 
 	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[11]->diffuseSpecularMapSRV);
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[11]->diffuseSpecularMapSRV);
 	gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
-	gDecal2->Render();
+	gDecal[1]->Render();
 
     //// Render lights ////
 
@@ -474,11 +492,11 @@ void UpdateScene(float frameTime)
 	gTeapot->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
 	
     // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
-	/*static float rotate = 0.0f;
+	static float rotate = 0.0f;
     static bool go = true;
-	gLights[0]->model->SetPosition( gCube3->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
+	gLights[0]->model->SetPosition( gTeapot->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
-    if (KeyHit(Key_1))  go = !go;*/
+    if (KeyHit(Key_1))  go = !go;
 
 	//Update 1st light's strength
 	gLights[0]->strength = abs(sin(gPerFrameConstants.gTime)) * MAX_LIGHT_STRENGTH;
@@ -495,7 +513,6 @@ void UpdateScene(float frameTime)
 	
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
-
 
     // Toggle FPS limiting
     if (KeyHit(Key_P))  lockFPS = !lockFPS;
