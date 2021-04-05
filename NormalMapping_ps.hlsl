@@ -47,10 +47,15 @@ float4 main(NormalMappingPixelShaderInput input) : SV_Target
 	float3 light2Vector = gLight2Position - input.worldPosition;
 	float  light2Distance = length(light2Vector);
 	float3 light2Direction = light2Vector / light2Distance;
-	float3 diffuseLight2 = gLight2Colour * max(dot(worldNormal, light2Direction), 0) / light2Distance;
-
-	halfway = normalize(light2Direction + cameraDirection);
-	float3 specularLight2 = diffuseLight2 * pow(max(dot(worldNormal, halfway), 0), gSpecularPower);
+	float3 diffuseLight2 = 0;
+	float3 specularLight2 = 0;
+	// Light 2
+	if (dot(gLight2Facing, -light2Direction) > 0.70710689672)
+	{
+		diffuseLight2 = gLight2Colour * max(dot(worldNormal, light2Direction), 0) / light2Distance;
+		halfway = normalize(light2Direction + cameraDirection);
+		specularLight2 = diffuseLight2 * pow(max(dot(worldNormal, halfway), 0), gSpecularPower);
+	}
 
 
 

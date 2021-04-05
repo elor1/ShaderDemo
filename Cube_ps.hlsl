@@ -45,11 +45,18 @@ float3 specularLight1 = diffuseLight1 * pow(max(dot(input.worldNormal, halfway),
 
 //// Light 2 ////
 
-float3 light2Direction = normalize(gLight2Position - input.worldPosition);
-float3 light2Dist = length(gLight2Position - input.worldPosition);
-float3 diffuseLight2 = gLight2Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Dist;
-halfway = normalize(light2Direction + cameraDirection);
-float3 specularLight2 = diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
+float3 light2Vector = gLight2Position - input.worldPosition;
+float  light2Distance = length(light2Vector);
+float3 light2Direction = light2Vector / light2Distance;
+float3 diffuseLight2 = 0;
+float3 specularLight2 = 0;
+// Light 2
+if (dot(gLight2Facing, -light2Direction) > cos(45))
+{
+	diffuseLight2 = gLight2Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Distance;
+	halfway = normalize(light2Direction + cameraDirection);
+	specularLight2 = diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
+}
 
 
 // Sum the effect of the lights - add the ambient at this stage rather than for each light (or we will get too much ambient)

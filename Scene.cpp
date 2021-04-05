@@ -252,9 +252,9 @@ bool InitScene()
     gLights[0]->model->SetPosition({ 30, 20, 0 });
 
     gLights[1]->colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1]->model->SetPosition({ -20, 50, 20 });
-    
-
+    gLights[1]->model->SetPosition({ -40, 50, 40 });
+	gLights[1]->model->SetRotation({ 0.0f, 1.7f, 0.0f });
+	gLights[1]->strength *= 2;
     //// Set up camera ////
 
     gCamera = new Camera();
@@ -440,6 +440,7 @@ void RenderScene()
     gPerFrameConstants.light1Position = gLights[0]->model->Position();
     gPerFrameConstants.light2Colour   = gLights[1]->colour * gLights[1]->strength;
     gPerFrameConstants.light2Position = gLights[1]->model->Position();
+	gPerFrameConstants.light2Facing	  = Normalise(gLights[1]->model->WorldMatrix().GetZAxis());
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
