@@ -20,7 +20,7 @@ ID3D11PixelShader*  gPixelLightingPixelShader  = nullptr;
 ID3D11VertexShader* gBasicTransformVertexShader = nullptr;
 ID3D11PixelShader*  gLightModelPixelShader  = nullptr;
 ID3D11VertexShader* gWiggleVertexShader = nullptr;
-ID3D11PixelShader*  gSpherePixelShader = nullptr;
+ID3D11PixelShader*  gTextureScrollPixelShader = nullptr;
 ID3D11PixelShader* gFadeTexturePixelShader = nullptr;
 ID3D11PixelShader* gNormalMappingPixelShader = nullptr;
 ID3D11VertexShader* gNormalMappingVertexShader = nullptr;
@@ -42,9 +42,9 @@ bool LoadShaders()
     gPixelLightingPixelShader   = LoadPixelShader ("PixelLighting_ps");
     gBasicTransformVertexShader = LoadVertexShader("BasicTransform_vs");
     gLightModelPixelShader      = LoadPixelShader ("LightModel_ps");
-	gWiggleVertexShader = LoadVertexShader("Sphere_vs");
-	gSpherePixelShader = LoadPixelShader("Sphere_ps");
-	gFadeTexturePixelShader = LoadPixelShader("Cube_ps");
+	gWiggleVertexShader = LoadVertexShader("Wiggle_vs");
+	gTextureScrollPixelShader = LoadPixelShader("TextureScroll_ps");
+	gFadeTexturePixelShader = LoadPixelShader("TextureFade_ps");
 	gNormalMappingPixelShader = LoadPixelShader("NormalMapping_ps");
 	gNormalMappingVertexShader = LoadVertexShader("NormalMapping_vs");
 	gParallaxMappingPixelShader = LoadPixelShader("ParallaxMapping_ps");
@@ -52,7 +52,7 @@ bool LoadShaders()
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr ||
-		gWiggleVertexShader == nullptr || gSpherePixelShader == nullptr ||
+		gWiggleVertexShader == nullptr || gTextureScrollPixelShader == nullptr ||
 		gFadeTexturePixelShader == nullptr ||
 		gNormalMappingPixelShader == nullptr || gNormalMappingVertexShader == nullptr ||
 		gParallaxMappingPixelShader == nullptr ||
@@ -72,7 +72,7 @@ void ReleaseShaders()
     if (gBasicTransformVertexShader)  gBasicTransformVertexShader->Release();
     if (gPixelLightingPixelShader)    gPixelLightingPixelShader->Release();
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
-	if (gSpherePixelShader)			  gSpherePixelShader->Release();
+	if (gTextureScrollPixelShader)			  gTextureScrollPixelShader->Release();
 	if (gWiggleVertexShader)		  gWiggleVertexShader->Release();
 	if (gFadeTexturePixelShader)	  gFadeTexturePixelShader->Release();
 	if (gNormalMappingPixelShader)	  gNormalMappingPixelShader->Release();

@@ -205,7 +205,7 @@
     <None Include="Common.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Cube_ps.hlsl">
+    <FxCompile Include="TextureFade_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="LightModel_ps.hlsl">
@@ -257,10 +257,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Sphere_ps.hlsl">
+    <FxCompile Include="TextureScroll_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="Sphere_vs.hlsl">
+    <FxCompile Include="Wiggle_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="TextureAlpha_ps.hlsl">

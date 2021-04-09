@@ -95,15 +95,6 @@
     <FxCompile Include="PixelLighting_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Sphere_vs.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Sphere_ps.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Cube_ps.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="NormalMapping_vs.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -114,6 +105,15 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="TextureAlpha_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Wiggle_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TextureScroll_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="TextureFade_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

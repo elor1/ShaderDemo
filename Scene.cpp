@@ -72,7 +72,7 @@ Light* gLights[NUM_LIGHTS];
 
 // Additional light information
 CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
-float    gSpecularPower = 256; // Specular power controls shininess - same for all models in this app
+float    gSpecularPower = 64; // Specular power controls shininess - same for all models in this app
 
 ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
 
@@ -376,7 +376,7 @@ void RenderSceneFromCamera(Camera* camera)
 
 	// Select which shaders to use next
 	gD3DContext->VSSetShader(gWiggleVertexShader, nullptr, 0);
-	gD3DContext->PSSetShader(gSpherePixelShader, nullptr, 0);
+	gD3DContext->PSSetShader(gTextureScrollPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[1]->diffuseSpecularMapSRV);
 	gSphere->Render();
 
