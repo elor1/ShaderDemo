@@ -6,6 +6,8 @@ class Texture
 {
 public:
 	Texture(std::string filename);
+	~Texture();
+	
 	std::string fileName;
 	ID3D11Resource* diffuseSpecularMap;
 	ID3D11ShaderResourceView* diffuseSpecularMapSRV;

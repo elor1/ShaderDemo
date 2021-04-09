@@ -41,6 +41,7 @@ const float ROTATION_SPEED = 2.0f;  // 2 radians per second for rotation
 const float MOVEMENT_SPEED = 50.0f; // 50 units per second for movement (what a unit of length is depends on 3D model - i.e. an artist decision usually)
 const float BASE_LIGHT_STRENGTH = 40.0f;
 const float LIGHT_COLOUR_CHANGE = 0.3f;
+const float SPOTLIGHT_ANGLE = 90.0f;
 
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
 Mesh* gTeapotMesh;
@@ -123,13 +124,13 @@ bool InitGeometry()
     // IMPORTANT NOTE: Will only keep the first object from the mesh - multipart objects will have parts missing - see later lab for more robust loader
     try 
     {
-		gTeapotMesh	  = new Mesh("Teapot.x");
-		gSphereMesh	  = new Mesh("Sphere.x");
-		gCubeMesh	  = new Mesh("Cube.x");
-        gGroundMesh   = new Mesh("Hills.x", true);
-        gLightMesh    = new Mesh("Light.x");
+		gTeapotMesh	     = new Mesh("Teapot.x");
+		gSphereMesh	     = new Mesh("Sphere.x");
+		gCubeMesh	     = new Mesh("Cube.x");
+        gGroundMesh      = new Mesh("Hills.x", true);
+        gLightMesh       = new Mesh("Light.x");
 		gCubeTangentMesh = new Mesh("Cube.x", true);
-		gDecalMesh = new Mesh("Decal.x");
+		gDecalMesh       = new Mesh("Decal.x");
     }
     catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
     {
@@ -157,16 +158,16 @@ bool InitGeometry()
         return false;
     }
 
-	gTextures[0] = new Texture("MetalDiffuseSpecular.dds");
-	gTextures[1] = new Texture("tiles1.jpg");
-	gTextures[2] = new Texture("brick1.jpg");
-	gTextures[3] = new Texture("wood2.jpg");
-	gTextures[4] = new Texture("CobbleDiffuseSpecular.dds");
-	gTextures[5] = new Texture("Flare.jpg");
-	gTextures[6] = new Texture("PatternDiffuseSpecular.dds");
-	gTextures[7] = new Texture("PatternNormal.dds");
-	gTextures[8] = new Texture("CobbleNormalHeight.dds");
-	gTextures[9] = new Texture("Moogle.png");
+	gTextures[0]  = new Texture("MetalDiffuseSpecular.dds");
+	gTextures[1]  = new Texture("tiles1.jpg");
+	gTextures[2]  = new Texture("brick1.jpg");
+	gTextures[3]  = new Texture("wood2.jpg");
+	gTextures[4]  = new Texture("CobbleDiffuseSpecular.dds");
+	gTextures[5]  = new Texture("Flare.jpg");
+	gTextures[6]  = new Texture("PatternDiffuseSpecular.dds");
+	gTextures[7]  = new Texture("PatternNormal.dds");
+	gTextures[8]  = new Texture("CobbleNormalHeight.dds");
+	gTextures[9]  = new Texture("Moogle.png");
 	gTextures[10] = new Texture("StoneDiffuseSpecular.dds");
 	gTextures[11] = new Texture("Cloud.png");
 
@@ -202,15 +203,10 @@ bool InitGeometry()
 bool InitScene()
 {
 	//// Set up scene ////
-
 	gTeapot = new Model(gTeapotMesh);
 	gSphere = new Model(gSphereMesh);
-	//gCube = new Model(gCubeMesh);
 	gGround = new Model(gGroundMesh);
 	gCubeTangent = new Model(gCubeTangentMesh);
-	//gDecal = new Model(gDecalMesh);
-	//gCube3 = new Model(gCubeMesh);
-	//gDecal2 = new Model(gDecalMesh);
 
 	for (int i = 0; i < NUM_CUBES; i++)
 	{
@@ -237,15 +233,14 @@ bool InitScene()
 
 	gCube[1]->SetPosition({ -10.0f, 30.0f, 40.0f });
 	gDecal[0]->SetPosition({ -10.0f, 30.0f, 39.9f });
-
-    // Light set-up - using an array this time
 	
+    // Light set-up
     for (int i = 0; i < NUM_LIGHTS; i++)
     {
 		gLights[i] = new Light();
 		gLights[i]->model = new Model(gLightMesh);
 		gLights[i]->strength = BASE_LIGHT_STRENGTH;
-		gLights[i]->model->SetScale(pow(gLights[i]->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
+		gLights[i]->model->SetScale(pow(gLights[i]->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light
     }
 
     gLights[0]->colour = { 0.8f, 0.8f, 1.0f };
@@ -255,8 +250,8 @@ bool InitScene()
     gLights[1]->model->SetPosition({ -80, 50, 40 });
 	gLights[1]->model->SetRotation({ 0.0f, 1.7f, 0.0f });
 	gLights[1]->strength *= 3;
+	
     //// Set up camera ////
-
     gCamera = new Camera();
     gCamera->SetPosition({ 15, 50,-120 });
     gCamera->SetRotation({ ToRadians(13), 0, 0 });
@@ -272,11 +267,6 @@ void ReleaseResources()
 
 	for (auto texture : gTextures)
 	{
-		if (texture)
-		{
-			texture->diffuseSpecularMap->Release();
-			texture->diffuseSpecularMapSRV->Release();
-		}
 		delete texture;    texture = nullptr;
 	}
 
@@ -284,13 +274,6 @@ void ReleaseResources()
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
 
     ReleaseShaders();
-
-    // See note in InitGeometry about why we're not using unique_ptr and having to manually delete
-	
-   /* for (int i = 0; i < NUM_LIGHTS; ++i)
-    {
-        delete gLights[i]->model;  gLights[i]->model = nullptr;
-    }*/
 
 	for (auto light : gLights)
 	{
@@ -307,19 +290,19 @@ void ReleaseResources()
 		delete decal;	decal = nullptr;
 	}
 	
-    delete gCamera;    gCamera    = nullptr;
-    delete gGround;    gGround    = nullptr;
-	delete gTeapot;	   gTeapot    = nullptr;
-	delete gSphere;	   gSphere    = nullptr;
-	delete gCubeTangent;	   gCubeTangent	  = nullptr;
+    delete gCamera;      gCamera      = nullptr;
+    delete gGround;      gGround      = nullptr;
+	delete gTeapot;	     gTeapot      = nullptr;
+	delete gSphere;	     gSphere      = nullptr;
+	delete gCubeTangent; gCubeTangent = nullptr;
 
-    delete gLightMesh;     gLightMesh     = nullptr;
-    delete gGroundMesh;    gGroundMesh    = nullptr;
-	delete gTeapotMesh;    gTeapotMesh    = nullptr;
-	delete gSphereMesh;	   gSphereMesh		  = nullptr;
-	delete gCubeMesh;	   gCubeMesh		  = nullptr;
+    delete gLightMesh;       gLightMesh       = nullptr;
+    delete gGroundMesh;      gGroundMesh      = nullptr;
+	delete gTeapotMesh;      gTeapotMesh      = nullptr;
+	delete gSphereMesh;	     gSphereMesh	  = nullptr;
+	delete gCubeMesh;	     gCubeMesh		  = nullptr;
 	delete gCubeTangentMesh; gCubeTangentMesh = nullptr;
-	delete gDecalMesh;	   gDecalMesh	  = nullptr;
+	delete gDecalMesh;	     gDecalMesh		  = nullptr;
 }
 
 
@@ -338,65 +321,65 @@ void RenderSceneFromCamera(Camera* camera)
     UpdateConstantBuffer(gPerFrameConstantBuffer, gPerFrameConstants);
 
     // Indicate that the constant buffer we just updated is for use in the vertex shader (VS) and pixel shader (PS)
-    gD3DContext->VSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer); // First parameter must match constant buffer number in the shader 
+    gD3DContext->VSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
     gD3DContext->PSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
 
-
     //// Render lit models ////
-
     // Select which shaders to use next
     gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
     gD3DContext->PSSetShader(gPixelLightingPixelShader,  nullptr, 0);
     
-    // States - no blending, normal depth buffer and culling
+    // Select states
     gD3DContext->OMSetBlendState(gNoBlendingState, nullptr, 0xffffff);
     gD3DContext->OMSetDepthStencilState(gUseDepthBufferState, 0);
     gD3DContext->RSSetState(gCullBackState);
 
-    // Select the approriate textures and sampler to use in the pixel shader
+    // Select the appropriate textures and sampler to use in the pixel shader
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[0]->diffuseSpecularMapSRV);
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
-    // Render model - it will update the model's world matrix and send it to the GPU in a constant buffer, then it will call
-    // the Mesh render function, which will set up vertex & index buffer before finally calling Draw on the GPU
-
+    // Render teapot
 	gTeapot->Render();
 	
-    // Render other lit models, only change textures for each one
+    //Render ground
 	gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gParallaxMappingPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[4]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shader
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[8]->diffuseSpecularMapSRV);
 	gGround->Render();
 
+	//Render cube
 	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[2]->diffuseSpecularMapSRV);
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[3]->diffuseSpecularMapSRV);
 	gCube[0]->Render();
-
-	// Select which shaders to use next
+	
+	//Render sphere
 	gD3DContext->VSSetShader(gWiggleVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gTextureScrollPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[1]->diffuseSpecularMapSRV);
 	gSphere->Render();
 
-	// Select which shaders to use next
+	//Render cube
 	gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gNormalMappingPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[6]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[7]->diffuseSpecularMapSRV);
 	gCubeTangent->Render();
 
+	//Render cube
 	gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gPixelLightingPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[10]->diffuseSpecularMapSRV);
 	gCube[1]->Render();
 
+	//Render decal
 	gD3DContext->PSSetShader(gTextureAlphaPixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[9]->diffuseSpecularMapSRV);
 	gD3DContext->OMSetBlendState(gMultiplicativeBlendingState, nullptr, 0xffffff);
 	gDecal[0]->Render();
 
+	//Render decal
 	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
 	gD3DContext->PSSetShaderResources(0, 1, &gTextures[11]->diffuseSpecularMapSRV);
 	gD3DContext->PSSetShaderResources(1, 1, &gTextures[11]->diffuseSpecularMapSRV);
@@ -404,16 +387,12 @@ void RenderSceneFromCamera(Camera* camera)
 	gDecal[1]->Render();
 
     //// Render lights ////
-
-    // Select which shaders to use next
 	gD3DContext->VSSetShader(gBasicTransformVertexShader, nullptr, 0);
 	gD3DContext->PSSetShader(gLightModelPixelShader, nullptr, 0);
-
-    // Select the texture and sampler to use in the pixel shader
     gD3DContext->PSSetShaderResources(0, 1, &gTextures[5]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
     gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
 
-    // States - additive blending, read-only depth buffer and no culling (standard set-up for blending
+    // States - additive blending, read-only depth buffer and no culling
     gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
     gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
     gD3DContext->RSSetState(gCullNoneState);
@@ -421,7 +400,7 @@ void RenderSceneFromCamera(Camera* camera)
     // Render all the lights in the array
     for (int i = 0; i < NUM_LIGHTS; ++i)
     {
-        gPerModelConstants.objectColour = gLights[i]->colour; // Set any per-model constants apart from the world matrix just before calling render (light colour here)
+        gPerModelConstants.objectColour = gLights[i]->colour;
         gLights[i]->model->Render();
     }
 }
@@ -438,9 +417,11 @@ void RenderScene()
     // Don't send to the GPU yet, the function RenderSceneFromCamera will do that
     gPerFrameConstants.light1Colour   = gLights[0]->colour * gLights[0]->strength;
     gPerFrameConstants.light1Position = gLights[0]->model->Position();
+	
     gPerFrameConstants.light2Colour   = gLights[1]->colour * gLights[1]->strength;
     gPerFrameConstants.light2Position = gLights[1]->model->Position();
 	gPerFrameConstants.light2Facing	  = Normalise(gLights[1]->model->WorldMatrix().GetZAxis());
+	gPerFrameConstants.light2CosHalfAngle = cos(ToRadians(SPOTLIGHT_ANGLE / 2));
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
     gPerFrameConstants.specularPower  = gSpecularPower;
@@ -449,7 +430,6 @@ void RenderScene()
 
 
     //// Main scene rendering ////
-
     // Set the back buffer as the target for rendering and select the main depth buffer.
     // When finished the back buffer is sent to the "front buffer" - which is the monitor.
     gD3DContext->OMSetRenderTargets(1, &gBackBufferRenderTarget, gDepthStencil);
@@ -471,9 +451,7 @@ void RenderScene()
     // Render the scene from the main camera
     RenderSceneFromCamera(gCamera);
 
-
     //// Scene completion ////
-
     // When drawing to the off-screen back buffer is complete, we "present" the image to the front buffer (the screen)
     // Set first parameter to 1 to lock to vsync (typically 60fps)
     gSwapChain->Present(lockFPS ? 1 : 0, 0);
@@ -489,10 +467,11 @@ void UpdateScene(float frameTime)
 {
 	gPerFrameConstants.gTime += frameTime;
 	
-	// Control sphere (will update its world matrix)
+	// Control models
 	gTeapot->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
+	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
 	
-    // Orbit the light - a bit of a cheat with the static variable [ask the tutor if you want to know what this is]
+    // Orbit the light
 	static float rotate = 0.0f;
     static bool go = true;
 	gLights[0]->model->SetPosition( gTeapot->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
@@ -511,11 +490,6 @@ void UpdateScene(float frameTime)
 		HSLColour.x = 0.0f;
 	}
 	gLights[1]->colour = HSLToRGB(HSLColour);
-
-	//gLights[1]->model->SetRotation(gLights[1]->model->Rotation() + CVector3({ 0.0f, gLightOrbitSpeed * frameTime, 0.0f }));
-	
-	// Control camera (will update its view matrix)
-	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
 
     // Toggle FPS limiting
     if (KeyHit(Key_P))  lockFPS = !lockFPS;

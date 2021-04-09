@@ -26,7 +26,7 @@ float  light2Distance = length(light2Vector);
 float3 light2Direction = light2Vector / light2Distance;
 float3 diffuseLight2 = 0;
 float3 specularLight2 = 0;
-if (dot(gLight2Facing, -light2Direction) > 0.70710689672)
+if (dot(gLight2Facing, -light2Direction) > gLight2CosHalfAngle)
 {
 	diffuseLight2 = gLight2Colour * max(dot(input.worldNormal, light2Direction), 0) / light2Distance;
 	halfway = normalize(light2Direction + cameraDirection);

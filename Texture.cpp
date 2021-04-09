@@ -7,6 +7,12 @@ Texture::Texture(std::string filename)
 	fileName = filename;
 }
 
+Texture::~Texture()
+{
+	if (diffuseSpecularMap) diffuseSpecularMap->Release();
+	if (diffuseSpecularMapSRV) diffuseSpecularMapSRV->Release();
+}
+
 bool Texture::Load()
 {
 	if (!LoadTexture(fileName, &diffuseSpecularMap, &diffuseSpecularMapSRV))

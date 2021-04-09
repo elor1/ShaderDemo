@@ -50,7 +50,7 @@ float4 main(NormalMappingPixelShaderInput input) : SV_Target
 	float3 diffuseLight2 = 0;
 	float3 specularLight2 = 0;
 	// Light 2
-	if (dot(gLight2Facing, -light2Direction) > 0.70710689672)
+	if (dot(gLight2Facing, -light2Direction) > gLight2CosHalfAngle)
 	{
 		diffuseLight2 = gLight2Colour * max(dot(worldNormal, light2Direction), 0) / light2Distance;
 		halfway = normalize(light2Direction + cameraDirection);
