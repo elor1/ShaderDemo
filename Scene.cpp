@@ -39,7 +39,7 @@
 // Constants controlling speed of movement/rotation (measured in units per second because we're using frame time)
 const float ROTATION_SPEED = 2.0f;  // 2 radians per second for rotation
 const float MOVEMENT_SPEED = 50.0f; // 50 units per second for movement (what a unit of length is depends on 3D model - i.e. an artist decision usually)
-const float MAX_LIGHT_STRENGTH = 40.0f;
+const float BASE_LIGHT_STRENGTH = 40.0f;
 const float LIGHT_COLOUR_CHANGE = 0.3f;
 
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
@@ -52,15 +52,15 @@ Mesh* gCubeTangentMesh;
 Mesh* gDecalMesh;
 
 const int NUM_CUBES = 2;
+Model* gCube[NUM_CUBES];
+
 const int NUM_DECALS = 2;
+Model* gDecal[NUM_DECALS];
+
 Model* gTeapot;
 Model* gSphere;
-Model* gCube[NUM_CUBES];
 Model* gGround;
 Model* gCubeTangent;
-Model* gDecal[NUM_DECALS];
-//Model* gCube3;
-//Model* gDecal2;
 
 Camera* gCamera;
 
@@ -244,7 +244,7 @@ bool InitScene()
     {
 		gLights[i] = new Light();
 		gLights[i]->model = new Model(gLightMesh);
-		gLights[i]->strength = MAX_LIGHT_STRENGTH;
+		gLights[i]->strength = BASE_LIGHT_STRENGTH;
 		gLights[i]->model->SetScale(pow(gLights[i]->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light - equation is ad-hoc.
     }
 
@@ -252,9 +252,9 @@ bool InitScene()
     gLights[0]->model->SetPosition({ 30, 20, 0 });
 
     gLights[1]->colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1]->model->SetPosition({ -40, 50, 40 });
+    gLights[1]->model->SetPosition({ -80, 50, 40 });
 	gLights[1]->model->SetRotation({ 0.0f, 1.7f, 0.0f });
-	gLights[1]->strength *= 2;
+	gLights[1]->strength *= 3;
     //// Set up camera ////
 
     gCamera = new Camera();
@@ -500,7 +500,7 @@ void UpdateScene(float frameTime)
     if (KeyHit(Key_1))  go = !go;
 
 	//Update 1st light's strength
-	gLights[0]->strength = abs(sin(gPerFrameConstants.gTime)) * MAX_LIGHT_STRENGTH;
+	gLights[0]->strength = abs(sin(gPerFrameConstants.gTime)) * BASE_LIGHT_STRENGTH;
 	gLights[0]->model->SetScale(pow(gLights[0]->strength, 0.7f));
 
 	//Update 2nd light's colour
@@ -511,6 +511,8 @@ void UpdateScene(float frameTime)
 		HSLColour.x = 0.0f;
 	}
 	gLights[1]->colour = HSLToRGB(HSLColour);
+
+	//gLights[1]->model->SetRotation(gLights[1]->model->Rotation() + CVector3({ 0.0f, gLightOrbitSpeed * frameTime, 0.0f }));
 	
 	// Control camera (will update its view matrix)
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D );
