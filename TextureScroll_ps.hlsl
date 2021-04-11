@@ -1,7 +1,7 @@
 #include "Common.hlsli"
 
-Texture2D DiffuseSpecularMap : register(t0); // Textures here can contain a diffuse map (main colour) in their rgb channels and a specular map (shininess) in the a channel
-SamplerState TexSampler      : register(s0); // A sampler is a filter for a texture like bilinear, trilinear or anisotropic - this is the sampler used for the texture above
+Texture2D DiffuseSpecularMap : register(t0);
+SamplerState TexSampler      : register(s0);
 
 float4 main(LightingPixelShaderInput input) : SV_Target
 {
@@ -10,8 +10,10 @@ input.worldNormal = normalize(input.worldNormal);
 	
 // Direction from pixel to camera
 float3 cameraDirection = normalize(gCameraPosition - input.worldPosition);
+
 	
-//// Light 1 ////
+//// Calculate lighting ////
+//Light 1
 // Direction and distance from pixel to light
 float3 light1Direction = normalize(gLight1Position - input.worldPosition);
 float3 light1Dist = length(gLight1Position - input.worldPosition);
@@ -20,7 +22,7 @@ float3 diffuseLight1 = gLight1Colour * max(dot(input.worldNormal, light1Directio
 float3 halfway = normalize(light1Direction + cameraDirection);
 float3 specularLight1 = diffuseLight1 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower); // Multiplying by diffuseLight instead of light colour - my own personal preference
 
-//// Light 2 ////
+//Light 2
 float3 light2Vector = gLight2Position - input.worldPosition;
 float  light2Distance = length(light2Vector);
 float3 light2Direction = light2Vector / light2Distance;
@@ -33,13 +35,11 @@ if (dot(gLight2Facing, -light2Direction) > gLight2CosHalfAngle)
 	specularLight2 = diffuseLight2 * pow(max(dot(input.worldNormal, halfway), 0), gSpecularPower);
 }
 
-//// Sum the effect of the lights ////
+//Sum the effect of the lights
 float3 diffuseLight = gAmbientColour + diffuseLight1 + diffuseLight2;
 float3 specularLight = specularLight1 + specularLight2;
 
 	
-//// Combine lighting and textures ////
-
 // Scroll texture
 float uCoord = input.uv.x + (0.1f * gTime);
 float vCoord = input.uv.y + (0.1f * gTime);

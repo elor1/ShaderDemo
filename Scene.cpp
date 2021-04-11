@@ -29,6 +29,9 @@
 #include <crtdbg.h>
 
 #include "Light.h"
+#include <vector>
+
+#include "SceneObject.h"
 
 //--------------------------------------------------------------------------------------
 // Scene Data
@@ -52,23 +55,15 @@ Mesh* gLightMesh;
 Mesh* gCubeTangentMesh;
 Mesh* gDecalMesh;
 
-const int NUM_CUBES = 2;
-Model* gCube[NUM_CUBES];
-
-const int NUM_DECALS = 2;
-Model* gDecal[NUM_DECALS];
-
-Model* gTeapot;
-Model* gSphere;
-Model* gGround;
-Model* gCubeTangent;
+std::vector<SceneObject*> gObjects;
 
 Camera* gCamera;
 
 
 // Store lights in an array in this exercise
 const int NUM_LIGHTS = 2;
-Light* gLights[NUM_LIGHTS]; 
+//Light* gLights[NUM_LIGHTS];
+std::vector<Light*> gLight;
 
 
 // Additional light information
@@ -89,25 +84,12 @@ bool lockFPS = true;
 // Constant Buffers
 //--------------------------------------------------------------------------------------
 // Variables sent over to the GPU each frame
-// The structures are now in Common.h
-// IMPORTANT: Any new data you add in C++ code (CPU-side) is not automatically available to the GPU
-//            Anything the shaders need (per-frame or per-model) needs to be sent via a constant buffer
 
-PerFrameConstants gPerFrameConstants;      // The constants that need to be sent to the GPU each frame (see common.h for structure)
+PerFrameConstants gPerFrameConstants;      // The constants that need to be sent to the GPU each frame
 ID3D11Buffer*     gPerFrameConstantBuffer; // The GPU buffer that will recieve the constants above
 
-PerModelConstants gPerModelConstants;      // As above, but constant that change per-model (e.g. world matrix)
-ID3D11Buffer*     gPerModelConstantBuffer; // --"--
-
-
-
-//--------------------------------------------------------------------------------------
-// Textures
-//--------------------------------------------------------------------------------------
-
-// DirectX objects controlling textures used in this lab
-const int NUM_TEXTURES = 12;
-Texture* gTextures[NUM_TEXTURES];
+PerModelConstants gPerModelConstants;     
+ID3D11Buffer*     gPerModelConstantBuffer;
 
 
 //--------------------------------------------------------------------------------------
@@ -120,8 +102,7 @@ bool InitGeometry()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	
-    // Load mesh geometry data, just like TL-Engine this doesn't create anything in the scene. Create a Model for that.
-    // IMPORTANT NOTE: Will only keep the first object from the mesh - multipart objects will have parts missing - see later lab for more robust loader
+    // Load mesh geometry data
     try 
     {
 		gTeapotMesh	     = new Mesh("Teapot.x");
@@ -132,9 +113,9 @@ bool InitGeometry()
 		gCubeTangentMesh = new Mesh("Cube.x", true);
 		gDecalMesh       = new Mesh("Decal.x");
     }
-    catch (std::runtime_error e)  // Constructors cannot return error messages so use exceptions to catch mesh errors (fairly standard approach this)
+    catch (std::runtime_error e)
     {
-        gLastError = e.what(); // This picks up the error message put in the exception (see Mesh.cpp)
+        gLastError = e.what();
         return false;
     }
 
@@ -149,7 +130,6 @@ bool InitGeometry()
 
     // Create GPU-side constant buffers to receive the gPerFrameConstants and gPerModelConstants structures above
     // These allow us to pass data from CPU to shaders such as lighting information or matrices
-    // See the comments above where these variable are declared and also the UpdateScene function
     gPerFrameConstantBuffer = CreateConstantBuffer(sizeof(gPerFrameConstants));
     gPerModelConstantBuffer = CreateConstantBuffer(sizeof(gPerModelConstants));
     if (gPerFrameConstantBuffer == nullptr || gPerModelConstantBuffer == nullptr)
@@ -158,36 +138,8 @@ bool InitGeometry()
         return false;
     }
 
-	gTextures[0]  = new Texture("MetalDiffuseSpecular.dds");
-	gTextures[1]  = new Texture("tiles1.jpg");
-	gTextures[2]  = new Texture("brick1.jpg");
-	gTextures[3]  = new Texture("wood2.jpg");
-	gTextures[4]  = new Texture("CobbleDiffuseSpecular.dds");
-	gTextures[5]  = new Texture("Flare.jpg");
-	gTextures[6]  = new Texture("PatternDiffuseSpecular.dds");
-	gTextures[7]  = new Texture("PatternNormal.dds");
-	gTextures[8]  = new Texture("CobbleNormalHeight.dds");
-	gTextures[9]  = new Texture("Moogle.png");
-	gTextures[10] = new Texture("StoneDiffuseSpecular.dds");
-	gTextures[11] = new Texture("Cloud.png");
-
-    //// Load / prepare textures on the GPU ////
-
-    // Load textures and create DirectX objects for them
-    // The LoadTexture function requires you to pass a ID3D11Resource* (e.g. &gCubeDiffuseMap), which manages the GPU memory for the
-    // texture and also a ID3D11ShaderResourceView* (e.g. &gCubeDiffuseMapSRV), which allows us to use the texture in shaders
-    // The function will fill in these pointers with usable data. The variables used here are globals found near the top of the file.
-	for (auto texture : gTextures)
-	{
-		if (!texture->Load())
-		{
-			return false;
-		}
-	}
-   
-
-
-  	// Create all filtering modes, blending modes etc. used by the app (see State.cpp/.h)
+	
+  	// Create all filtering modes, blending modes etc.
 	if (!CreateStates())
 	{
 		gLastError = "Error creating states";
@@ -202,54 +154,92 @@ bool InitGeometry()
 // Returns true on success
 bool InitScene()
 {
-	//// Set up scene ////
-	gTeapot = new Model(gTeapotMesh);
-	gSphere = new Model(gSphereMesh);
-	gGround = new Model(gGroundMesh);
-	gCubeTangent = new Model(gCubeTangentMesh);
+	//// Set up models ////
+	//Cubes
+	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("brick1.jpg"), gPixelLightingVertexShader,
+	                                   gFadeTexturePixelShader, gNoBlendingState, gCullBackState, gUseDepthBufferState,
+	                                   gAnisotropic4xSampler));
+	gObjects.back()->textures.push_back(new Texture("wood2.jpg"));
+	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.0f });
 
-	for (int i = 0; i < NUM_CUBES; i++)
+	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("StoneDiffuseSpecular.dds"),
+	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 40.0f });
+
+	gObjects.push_back(new SceneObject(new Model(gCubeTangentMesh), new Texture("PatternDiffuseSpecular.dds"),
+	                                   gNormalMappingVertexShader, gNormalMappingPixelShader, gNoBlendingState,
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	gObjects.back()->textures.push_back(new Texture("PatternNormal.dds"));
+	gObjects.back()->model->SetPosition({ 50.0f, 10.0f,40.0f });
+	gObjects.back()->model->SetRotation({ 0.0f, 45.0f, 0.0f });
+	gObjects.back()->model->SetScale(1.5f);
+
+	//Decals
+	gObjects.push_back(new SceneObject(new Model(gDecalMesh), new Texture("Moogle.png"), gPixelLightingVertexShader,
+	                                   gTextureAlphaPixelShader, gMultiplicativeBlendingState, gCullBackState,
+	                                   gUseDepthBufferState, gAnisotropic4xSampler));
+	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 39.9f });
+
+	gObjects.push_back(new SceneObject(new Model(gDecalMesh), new Texture("Cloud.png"), gPixelLightingVertexShader,
+	                                   gFadeTexturePixelShader, gAdditiveBlendingState, gCullBackState,
+	                                   gUseDepthBufferState, gAnisotropic4xSampler));
+	gObjects.back()->textures.push_back(new Texture("Cloud.png"));
+	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.1f });
+
+	//Teapot
+	gObjects.push_back(new SceneObject(new Model(gTeapotMesh), new Texture("MetalDiffuseSpecular.dds"),
+	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	gObjects.back()->model->SetPosition({ 20.0f, 0.0f, 0.0f });
+	gObjects.back()->model->SetScale(1.5f);
+
+	//Sphere
+	gObjects.push_back(new SceneObject(new Model(gSphereMesh), new Texture("tiles1.jpg"), gWiggleVertexShader,
+	                                   gTextureScrollPixelShader, gNoBlendingState, gCullBackState,
+	                                   gUseDepthBufferState, gAnisotropic4xSampler));
+	gObjects.back()->model->SetPosition({ 15.0f, 20.0f, 50.0f });
+
+	//Ground
+	gObjects.push_back(new SceneObject(new Model(gGroundMesh), new Texture("CobbleDiffuseSpecular.dds"),
+	                                   gNormalMappingVertexShader, gParallaxMappingPixelShader, gNoBlendingState,
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	gObjects.back()->textures.push_back(new Texture("CobbleNormalHeight.dds"));
+
+	for (auto object : gObjects)
 	{
-		gCube[i] = new Model(gCubeMesh);
+		for (auto texture : object->textures)
+		{
+			if (!texture->Load())
+			{
+				return false;
+			}
+		}
 	}
-
-	for (int i = 0; i < NUM_DECALS; i++)
-	{
-		gDecal[i] = new Model(gDecalMesh);
-	}
-
-	// Initial positions
-	gTeapot->SetPosition({ 20.0f, 0.0f, 0.0f });
-	gTeapot->SetScale(1.5f);
-
-	gSphere->SetPosition({ 15.0f, 20.0f, 50.0f });
-
-	gCube[0]->SetPosition({ 50.0f, 10.0f, -40.0f });
-	gDecal[1]->SetPosition({ 50.0f, 10.0f, -40.1f });
-
-	gCubeTangent->SetPosition({ 50.0f, 10.0f,40.0f });
-	gCubeTangent->SetRotation({ 0.0f, 45.0f, 0.0f });
-	gCubeTangent->SetScale(1.5f);
-
-	gCube[1]->SetPosition({ -10.0f, 30.0f, 40.0f });
-	gDecal[0]->SetPosition({ -10.0f, 30.0f, 39.9f });
 	
-    // Light set-up
-    for (int i = 0; i < NUM_LIGHTS; i++)
-    {
-		gLights[i] = new Light();
-		gLights[i]->model = new Model(gLightMesh);
-		gLights[i]->strength = BASE_LIGHT_STRENGTH;
-		gLights[i]->model->SetScale(pow(gLights[i]->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light
-    }
+	//Light set up
+	for (int i = 0 ; i < NUM_LIGHTS; i++)
+	{
+		gLight.push_back(new Light(new Model(gLightMesh), new Texture("Flare.jpg"), gBasicTransformVertexShader, gLightModelPixelShader, gAdditiveBlendingState, gCullNoneState, gDepthReadOnlyState, gAnisotropic4xSampler, BASE_LIGHT_STRENGTH, { 0.8f, 0.8f, 1.0f }));
+	}
+	gLight[0]->model->SetPosition({ 30, 20, 0 });
+	gLight[1]->colour = { 1.0f, 0.8f, 0.2f };
+	gLight[1]->model->SetPosition({ -80, 50, 40 });
+	gLight[1]->model->SetRotation({ 0.0f, 1.7f, 0.0f });
+	gLight[1]->strength *= 3;
 
-    gLights[0]->colour = { 0.8f, 0.8f, 1.0f };
-    gLights[0]->model->SetPosition({ 30, 20, 0 });
-
-    gLights[1]->colour = { 1.0f, 0.8f, 0.2f };
-    gLights[1]->model->SetPosition({ -80, 50, 40 });
-	gLights[1]->model->SetRotation({ 0.0f, 1.7f, 0.0f });
-	gLights[1]->strength *= 3;
+	for (auto light : gLight)
+	{
+		light->model->SetScale(pow(light->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light
+		
+		for (auto texture : light->textures)
+		{
+			if (!texture->Load())
+			{
+				return false;
+			}
+		}
+	}
 	
     //// Set up camera ////
     gCamera = new Camera();
@@ -265,36 +255,22 @@ void ReleaseResources()
 {
     ReleaseStates();
 
-	for (auto texture : gTextures)
-	{
-		delete texture;    texture = nullptr;
-	}
-
     if (gPerModelConstantBuffer)  gPerModelConstantBuffer->Release();
     if (gPerFrameConstantBuffer)  gPerFrameConstantBuffer->Release();
 
     ReleaseShaders();
-
-	for (auto light : gLights)
+	
+	for (auto light : gLight)
 	{
 		delete light;	light = nullptr;
 	}
 
-	for (auto cube : gCube)
+	for (auto object : gObjects)
 	{
-		delete cube;	cube = nullptr;
+		delete object;	object = nullptr;
 	}
 
-	for (auto decal : gDecal)
-	{
-		delete decal;	decal = nullptr;
-	}
-	
-    delete gCamera;      gCamera      = nullptr;
-    delete gGround;      gGround      = nullptr;
-	delete gTeapot;	     gTeapot      = nullptr;
-	delete gSphere;	     gSphere      = nullptr;
-	delete gCubeTangent; gCubeTangent = nullptr;
+	delete gCamera;			 gCamera		  = nullptr;
 
     delete gLightMesh;       gLightMesh       = nullptr;
     delete gGroundMesh;      gGroundMesh      = nullptr;
@@ -324,84 +300,15 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->VSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
     gD3DContext->PSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
 
-    //// Render lit models ////
-    // Select which shaders to use next
-    gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
-    gD3DContext->PSSetShader(gPixelLightingPixelShader,  nullptr, 0);
-    
-    // Select states
-    gD3DContext->OMSetBlendState(gNoBlendingState, nullptr, 0xffffff);
-    gD3DContext->OMSetDepthStencilState(gUseDepthBufferState, 0);
-    gD3DContext->RSSetState(gCullBackState);
-
-    // Select the appropriate textures and sampler to use in the pixel shader
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[0]->diffuseSpecularMapSRV);
-    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
-
-    // Render teapot
-	gTeapot->Render();
+	for (auto object : gObjects)
+	{
+		object->Render();
+	}
 	
-    //Render ground
-	gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
-	gD3DContext->PSSetShader(gParallaxMappingPixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[4]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shader
-	gD3DContext->PSSetShaderResources(1, 1, &gTextures[8]->diffuseSpecularMapSRV);
-	gGround->Render();
-
-	//Render cube
-	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[2]->diffuseSpecularMapSRV);
-	gD3DContext->PSSetShaderResources(1, 1, &gTextures[3]->diffuseSpecularMapSRV);
-	gCube[0]->Render();
-	
-	//Render sphere
-	gD3DContext->VSSetShader(gWiggleVertexShader, nullptr, 0);
-	gD3DContext->PSSetShader(gTextureScrollPixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[1]->diffuseSpecularMapSRV);
-	gSphere->Render();
-
-	//Render cube
-	gD3DContext->VSSetShader(gNormalMappingVertexShader, nullptr, 0);
-	gD3DContext->PSSetShader(gNormalMappingPixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[6]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
-	gD3DContext->PSSetShaderResources(1, 1, &gTextures[7]->diffuseSpecularMapSRV);
-	gCubeTangent->Render();
-
-	//Render cube
-	gD3DContext->VSSetShader(gPixelLightingVertexShader, nullptr, 0);
-	gD3DContext->PSSetShader(gPixelLightingPixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[10]->diffuseSpecularMapSRV);
-	gCube[1]->Render();
-
-	//Render decal
-	gD3DContext->PSSetShader(gTextureAlphaPixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[9]->diffuseSpecularMapSRV);
-	gD3DContext->OMSetBlendState(gMultiplicativeBlendingState, nullptr, 0xffffff);
-	gDecal[0]->Render();
-
-	//Render decal
-	gD3DContext->PSSetShader(gFadeTexturePixelShader, nullptr, 0);
-	gD3DContext->PSSetShaderResources(0, 1, &gTextures[11]->diffuseSpecularMapSRV);
-	gD3DContext->PSSetShaderResources(1, 1, &gTextures[11]->diffuseSpecularMapSRV);
-	gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
-	gDecal[1]->Render();
-
-    //// Render lights ////
-	gD3DContext->VSSetShader(gBasicTransformVertexShader, nullptr, 0);
-	gD3DContext->PSSetShader(gLightModelPixelShader, nullptr, 0);
-    gD3DContext->PSSetShaderResources(0, 1, &gTextures[5]->diffuseSpecularMapSRV); // First parameter must match texture slot number in the shaer
-    gD3DContext->PSSetSamplers(0, 1, &gAnisotropic4xSampler);
-
-    // States - additive blending, read-only depth buffer and no culling
-    gD3DContext->OMSetBlendState(gAdditiveBlendingState, nullptr, 0xffffff);
-    gD3DContext->OMSetDepthStencilState(gDepthReadOnlyState, 0);
-    gD3DContext->RSSetState(gCullNoneState);
-
-    // Render all the lights in the array
-    for (int i = 0; i < NUM_LIGHTS; ++i)
+    for (auto light : gLight)
     {
-        gPerModelConstants.objectColour = gLights[i]->colour;
-        gLights[i]->model->Render();
+		gPerModelConstants.objectColour = light->colour;
+		light->Render();
     }
 }
 
@@ -415,12 +322,12 @@ void RenderScene()
 
     // Set up the light information in the constant buffer
     // Don't send to the GPU yet, the function RenderSceneFromCamera will do that
-    gPerFrameConstants.light1Colour   = gLights[0]->colour * gLights[0]->strength;
-    gPerFrameConstants.light1Position = gLights[0]->model->Position();
+    gPerFrameConstants.light1Colour   = gLight[0]->colour * gLight[0]->strength;
+    gPerFrameConstants.light1Position = gLight[0]->model->Position();
 	
-    gPerFrameConstants.light2Colour   = gLights[1]->colour * gLights[1]->strength;
-    gPerFrameConstants.light2Position = gLights[1]->model->Position();
-	gPerFrameConstants.light2Facing	  = Normalise(gLights[1]->model->WorldMatrix().GetZAxis());
+    gPerFrameConstants.light2Colour   = gLight[1]->colour * gLight[1]->strength;
+    gPerFrameConstants.light2Position = gLight[1]->model->Position();
+	gPerFrameConstants.light2Facing	  = Normalise(gLight[1]->model->WorldMatrix().GetZAxis());
 	gPerFrameConstants.light2CosHalfAngle = cos(ToRadians(SPOTLIGHT_ANGLE / 2));
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
@@ -467,29 +374,29 @@ void UpdateScene(float frameTime)
 {
 	gPerFrameConstants.gTime += frameTime;
 	
-	// Control models
-	gTeapot->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
+	// Controls
+	gObjects[5]->model->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
 	
     // Orbit the light
 	static float rotate = 0.0f;
     static bool go = true;
-	gLights[0]->model->SetPosition( gTeapot->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
+	gLight[0]->model->SetPosition(gObjects[5]->model->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;
 
 	//Update 1st light's strength
-	gLights[0]->strength = abs(sin(gPerFrameConstants.gTime)) * BASE_LIGHT_STRENGTH;
-	gLights[0]->model->SetScale(pow(gLights[0]->strength, 0.7f));
+	gLight[0]->strength = abs(sin(gPerFrameConstants.gTime)) * BASE_LIGHT_STRENGTH;
+	gLight[0]->model->SetScale(pow(gLight[0]->strength, 0.7f));
 
 	//Update 2nd light's colour
-	CVector3 HSLColour = RGBToHSL(gLights[1]->colour);
+	CVector3 HSLColour = RGBToHSL(gLight[1]->colour);
 	HSLColour.x += LIGHT_COLOUR_CHANGE;
 	if (HSLColour.x >= 360.0f)
 	{
 		HSLColour.x = 0.0f;
 	}
-	gLights[1]->colour = HSLToRGB(HSLColour);
+	gLight[1]->colour = HSLToRGB(HSLColour);
 
     // Toggle FPS limiting
     if (KeyHit(Key_P))  lockFPS = !lockFPS;

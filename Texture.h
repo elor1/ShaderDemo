@@ -9,8 +9,8 @@ public:
 	~Texture();
 	
 	std::string fileName;
-	ID3D11Resource* diffuseSpecularMap;
-	ID3D11ShaderResourceView* diffuseSpecularMapSRV;
+	ID3D11Resource* textureResource;
+	ID3D11ShaderResourceView* textureSRV;
 
 	bool Load();
 };

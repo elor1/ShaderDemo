@@ -9,13 +9,13 @@ Texture::Texture(std::string filename)
 
 Texture::~Texture()
 {
-	if (diffuseSpecularMap) diffuseSpecularMap->Release();
-	if (diffuseSpecularMapSRV) diffuseSpecularMapSRV->Release();
+	if (textureResource) textureResource->Release();
+	if (textureSRV) textureSRV->Release();
 }
 
 bool Texture::Load()
 {
-	if (!LoadTexture(fileName, &diffuseSpecularMap, &diffuseSpecularMapSRV))
+	if (!LoadTexture(fileName, &textureResource, &textureSRV))
 	{
 		gLastError = "Error loading texture " + fileName;
 		return false;
