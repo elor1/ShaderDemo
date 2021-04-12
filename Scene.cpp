@@ -67,7 +67,7 @@ std::vector<Light*> gLight;
 
 
 // Additional light information
-CVector3 gAmbientColour = { 0.2f, 0.2f, 0.3f }; // Background level of light (slightly bluish to match the far background, which is dark blue)
+CVector3 gAmbientColour = { 0.3f, 0.4f, 0.5f }; // Background level of light
 float    gSpecularPower = 64; // Specular power controls shininess - same for all models in this app
 
 ColourRGBA gBackgroundColor = { 0.2f, 0.2f, 0.3f, 1.0f };
@@ -206,6 +206,11 @@ bool InitScene()
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
 	gObjects.back()->textures.push_back(new Texture("CobbleNormalHeight.dds"));
 
+	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("Skybox.dds"),
+		gSkyboxVertexShader, gSkyboxPixelShader, gNoBlendingState,
+		gCullFrontState, gSkyboxDepthBufferState, gTrilinearSampler));
+	gObjects.back()->model->SetScale(25.0f);
+	
 	for (auto object : gObjects)
 	{
 		for (auto texture : object->textures)
@@ -397,6 +402,9 @@ void UpdateScene(float frameTime)
 		HSLColour.x = 0.0f;
 	}
 	gLight[1]->colour = HSLToRGB(HSLColour);
+
+	//Skybox follows camera;
+	gObjects.back()->model->SetPosition(gCamera->Position());
 
     // Toggle FPS limiting
     if (KeyHit(Key_P))  lockFPS = !lockFPS;

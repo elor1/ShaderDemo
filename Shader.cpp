@@ -26,6 +26,8 @@ ID3D11PixelShader* gNormalMappingPixelShader = nullptr;
 ID3D11VertexShader* gNormalMappingVertexShader = nullptr;
 ID3D11PixelShader* gParallaxMappingPixelShader = nullptr;
 ID3D11PixelShader* gTextureAlphaPixelShader = nullptr;
+ID3D11VertexShader* gSkyboxVertexShader = nullptr;
+ID3D11PixelShader* gSkyboxPixelShader = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -49,6 +51,8 @@ bool LoadShaders()
 	gNormalMappingVertexShader = LoadVertexShader("NormalMapping_vs");
 	gParallaxMappingPixelShader = LoadPixelShader("ParallaxMapping_ps");
 	gTextureAlphaPixelShader = LoadPixelShader("TextureAlpha_ps");
+	gSkyboxVertexShader = LoadVertexShader("Skybox_vs");
+	gSkyboxPixelShader = LoadPixelShader("Skybox_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr ||
@@ -56,7 +60,8 @@ bool LoadShaders()
 		gFadeTexturePixelShader == nullptr ||
 		gNormalMappingPixelShader == nullptr || gNormalMappingVertexShader == nullptr ||
 		gParallaxMappingPixelShader == nullptr ||
-		gTextureAlphaPixelShader == nullptr)
+		gTextureAlphaPixelShader == nullptr||
+		gSkyboxVertexShader == nullptr || gSkyboxPixelShader == nullptr)
     {
         gLastError = "Error loading shaders";
         return false;
@@ -79,6 +84,8 @@ void ReleaseShaders()
 	if (gNormalMappingVertexShader)	  gNormalMappingVertexShader->Release();
 	if (gParallaxMappingPixelShader)  gParallaxMappingPixelShader->Release();
 	if (gTextureAlphaPixelShader)	  gTextureAlphaPixelShader->Release();
+	if (gSkyboxVertexShader)		  gSkyboxVertexShader->Release();
+	if (gSkyboxPixelShader)			  gSkyboxPixelShader->Release();
 }
 
 

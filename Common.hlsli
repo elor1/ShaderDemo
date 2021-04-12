@@ -24,6 +24,11 @@ struct TangentVertex
 	float2 uv       : uv;
 };
 
+struct SkyboxVertex
+{
+	float3 position : position;
+};
+
 // This structure describes what data the lighting pixel shader receives from the vertex shader.
 // The projected position is a required output from all vertex shaders - where the vertex is on the screen
 // The world position and normal at the vertex are sent to the pixel shader for the lighting equations.
@@ -62,6 +67,12 @@ struct NormalMappingPixelShaderInput
 	float3 modelTangent  : modelTangent;  // --"--
 
 	float2 uv : uv; // UVs are texture coordinates. The artist specifies for every vertex which point on the texture is "pinned" to that vertex.
+};
+
+struct SkyboxPixelShaderInput
+{
+	float4 projectedPosition : SV_Position;
+	float3 position : position;
 };
 
 //--------------------------------------------------------------------------------------

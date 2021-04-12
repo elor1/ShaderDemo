@@ -30,6 +30,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="SceneObject.cpp" />
+    <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -67,6 +68,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="SceneObject.h" />
+    <ClInclude Include="Skybox.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utility">
@@ -116,6 +118,12 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="TextureFade_ps.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Skybox_vs.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Skybox_ps.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

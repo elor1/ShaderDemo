@@ -22,6 +22,6 @@ public:
 	ID3D11DepthStencilState* depthStencilState;
 	ID3D11SamplerState* samplerState;
 
-	void Render();
+	virtual void Render();
 };
 

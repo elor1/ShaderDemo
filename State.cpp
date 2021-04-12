@@ -35,6 +35,7 @@ ID3D11RasterizerState* gCullNoneState  = nullptr;
 
 // Depth-stencil states allow us change how the depth buffer is used
 ID3D11DepthStencilState* gUseDepthBufferState = nullptr;
+ID3D11DepthStencilState* gSkyboxDepthBufferState = nullptr;
 ID3D11DepthStencilState* gDepthReadOnlyState  = nullptr;
 ID3D11DepthStencilState* gNoDepthBufferState  = nullptr;
 
@@ -263,6 +264,19 @@ bool CreateStates()
         return false;
     }
 
+	////-------- Skybox depth buffer --------////
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	depthStencilDesc.StencilEnable = FALSE;
+
+	// Create a DirectX object for the description above that can be used by a shader
+	if (FAILED(gD3DDevice->CreateDepthStencilState(&depthStencilDesc, &gSkyboxDepthBufferState)))
+	{
+		gLastError = "Error creating use-depth-buffer state";
+		return false;
+	}
+
 	
     ////-------- Enable depth buffer reads only --------////
     // Disables writing to depth buffer - used for transparent objects because they should not be entered in the buffer but do need to check if they are behind something
@@ -300,6 +314,7 @@ bool CreateStates()
 void ReleaseStates()
 {
     if (gUseDepthBufferState)    gUseDepthBufferState->Release();
+	if (gSkyboxDepthBufferState) gSkyboxDepthBufferState->Release();
     if (gDepthReadOnlyState)     gDepthReadOnlyState->Release();
     if (gNoDepthBufferState)     gNoDepthBufferState->Release();
     if (gCullBackState)          gCullBackState->Release();
