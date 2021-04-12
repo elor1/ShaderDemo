@@ -47,14 +47,8 @@ const float LIGHT_COLOUR_CHANGE = 0.3f;
 const float SPOTLIGHT_ANGLE = 90.0f;
 
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
-Mesh* gTeapotMesh;
-Mesh* gSphereMesh;
-Mesh* gCubeMesh;
-Mesh* gGroundMesh;
-Mesh* gLightMesh;
-Mesh* gCubeTangentMesh;
-Mesh* gDecalMesh;
-Mesh* gBikeMesh;
+const int NUM_MESHES = 8;
+Mesh* gMeshes[NUM_MESHES];
 
 std::vector<SceneObject*> gObjects;
 
@@ -106,14 +100,14 @@ bool InitGeometry()
     // Load mesh geometry data
     try 
     {
-		gTeapotMesh	     = new Mesh("Teapot.x");
-		gSphereMesh	     = new Mesh("Sphere.x");
-		gCubeMesh	     = new Mesh("Cube.x");
-        gGroundMesh      = new Mesh("Hills.x", true);
-        gLightMesh       = new Mesh("Light.x");
-		gCubeTangentMesh = new Mesh("Cube.x", true);
-		gDecalMesh       = new Mesh("Decal.x");
-		gBikeMesh		 = new Mesh("Bike.x");
+		gMeshes[0] = new Mesh("Teapot.x");
+		gMeshes[1] = new Mesh("Sphere.x");
+		gMeshes[2] = new Mesh("Cube.x");
+		gMeshes[3] = new Mesh("Hills.x", true);
+		gMeshes[4] = new Mesh("Light.x");
+		gMeshes[5] = new Mesh("Cube.x", true);
+		gMeshes[6] = new Mesh("Decal.x");
+		gMeshes[7] = new Mesh("Bike.x");
     }
     catch (std::runtime_error e)
     {
@@ -158,18 +152,18 @@ bool InitScene()
 {
 	//// Set up models ////
 	//Cubes
-	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("brick1.jpg"), gPixelLightingVertexShader,
+	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("brick1.jpg"), gPixelLightingVertexShader,
 	                                   gFadeTexturePixelShader, gNoBlendingState, gCullBackState, gUseDepthBufferState,
 	                                   gAnisotropic4xSampler, false));
 	gObjects.back()->textures.push_back(new Texture("wood2.jpg"));
 	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.0f });
 
-	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("StoneDiffuseSpecular.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("StoneDiffuseSpecular.dds"),
 	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 40.0f });
 
-	gObjects.push_back(new SceneObject(new Model(gCubeTangentMesh), new Texture("PatternDiffuseSpecular.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[5]), new Texture("PatternDiffuseSpecular.dds"),
 	                                   gNormalMappingVertexShader, gNormalMappingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->textures.push_back(new Texture("PatternNormal.dds"));
@@ -178,44 +172,44 @@ bool InitScene()
 	gObjects.back()->model->SetScale(1.5f);
 
 	//Decals
-	gObjects.push_back(new SceneObject(new Model(gDecalMesh), new Texture("Moogle.png"), gPixelLightingVertexShader,
+	gObjects.push_back(new SceneObject(new Model(gMeshes[6]), new Texture("Moogle.png"), gPixelLightingVertexShader,
 	                                   gTextureAlphaPixelShader, gMultiplicativeBlendingState, gCullBackState,
 	                                   gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 39.9f });
 
-	gObjects.push_back(new SceneObject(new Model(gDecalMesh), new Texture("Cloud.png"), gPixelLightingVertexShader,
+	gObjects.push_back(new SceneObject(new Model(gMeshes[6]), new Texture("Cloud.png"), gPixelLightingVertexShader,
 	                                   gFadeTexturePixelShader, gAdditiveBlendingState, gCullBackState,
 	                                   gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->textures.push_back(new Texture("Cloud.png"));
 	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.1f });
 
 	//Teapot
-	gObjects.push_back(new SceneObject(new Model(gTeapotMesh), new Texture("MetalDiffuseSpecular.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[0]), new Texture("MetalDiffuseSpecular.dds"),
 	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->model->SetPosition({ 20.0f, 0.0f, 0.0f });
 	gObjects.back()->model->SetScale(1.5f);
 
 	//Sphere
-	gObjects.push_back(new SceneObject(new Model(gSphereMesh), new Texture("tiles1.jpg"), gWiggleVertexShader,
+	gObjects.push_back(new SceneObject(new Model(gMeshes[1]), new Texture("tiles1.jpg"), gWiggleVertexShader,
 	                                   gTextureScrollPixelShader, gNoBlendingState, gCullBackState,
 	                                   gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->model->SetPosition({ 15.0f, 20.0f, 50.0f });
 
 	//Ground
-	gObjects.push_back(new SceneObject(new Model(gGroundMesh), new Texture("CobbleDiffuseSpecular.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[3]), new Texture("CobbleDiffuseSpecular.dds"),
 	                                   gNormalMappingVertexShader, gParallaxMappingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->textures.push_back(new Texture("CobbleNormalHeight.dds"));
 
 	//Bike
-	gObjects.push_back(new SceneObject(new Model(gBikeMesh), new Texture("Skybox.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[7]), new Texture("Skybox.dds"),
 		gReflectionVertexShader, gReflectionPixelShader, gNoBlendingState,
 		gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, -20.0f });
 	
 	//Skybox
-	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("Skybox.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("Skybox.dds"),
 		gSkyboxVertexShader, gSkyboxPixelShader, gNoBlendingState,
 		gCullFrontState, gSkyboxDepthBufferState, gTrilinearSampler, false));
 	gObjects.back()->model->SetScale(25.0f);
@@ -234,7 +228,7 @@ bool InitScene()
 	//Light set up
 	for (int i = 0 ; i < NUM_LIGHTS; i++)
 	{
-		gLight.push_back(new Light(new Model(gLightMesh), new Texture("Flare.jpg"), gBasicTransformVertexShader, gLightModelPixelShader, gAdditiveBlendingState, gCullNoneState, gDepthReadOnlyState, gAnisotropic4xSampler, BASE_LIGHT_STRENGTH, { 0.8f, 0.8f, 1.0f }));
+		gLight.push_back(new Light(new Model(gMeshes[4]), new Texture("Flare.jpg"), gBasicTransformVertexShader, gLightModelPixelShader, gAdditiveBlendingState, gCullNoneState, gDepthReadOnlyState, gAnisotropic4xSampler, BASE_LIGHT_STRENGTH, { 0.8f, 0.8f, 1.0f }));
 	}
 	gLight[0]->model->SetPosition({ 30, 20, 0 });
 	gLight[1]->colour = { 1.0f, 0.8f, 0.2f };
@@ -286,14 +280,10 @@ void ReleaseResources()
 
 	delete gCamera;			 gCamera		  = nullptr;
 
-    delete gLightMesh;       gLightMesh       = nullptr;
-    delete gGroundMesh;      gGroundMesh      = nullptr;
-	delete gTeapotMesh;      gTeapotMesh      = nullptr;
-	delete gSphereMesh;	     gSphereMesh	  = nullptr;
-	delete gCubeMesh;	     gCubeMesh		  = nullptr;
-	delete gCubeTangentMesh; gCubeTangentMesh = nullptr;
-	delete gDecalMesh;	     gDecalMesh		  = nullptr;
-	delete gBikeMesh;		 gBikeMesh		  = nullptr;
+    for (auto mesh : gMeshes)
+    {
+		delete mesh; mesh = nullptr;
+    }
 }
 
 
