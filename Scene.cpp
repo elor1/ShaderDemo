@@ -54,6 +54,7 @@ Mesh* gGroundMesh;
 Mesh* gLightMesh;
 Mesh* gCubeTangentMesh;
 Mesh* gDecalMesh;
+Mesh* gBikeMesh;
 
 std::vector<SceneObject*> gObjects;
 
@@ -112,6 +113,7 @@ bool InitGeometry()
         gLightMesh       = new Mesh("Light.x");
 		gCubeTangentMesh = new Mesh("Cube.x", true);
 		gDecalMesh       = new Mesh("Decal.x");
+		gBikeMesh		 = new Mesh("Bike.x");
     }
     catch (std::runtime_error e)
     {
@@ -158,18 +160,18 @@ bool InitScene()
 	//Cubes
 	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("brick1.jpg"), gPixelLightingVertexShader,
 	                                   gFadeTexturePixelShader, gNoBlendingState, gCullBackState, gUseDepthBufferState,
-	                                   gAnisotropic4xSampler));
+	                                   gAnisotropic4xSampler, false));
 	gObjects.back()->textures.push_back(new Texture("wood2.jpg"));
 	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.0f });
 
 	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("StoneDiffuseSpecular.dds"),
 	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
-	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 40.0f });
 
 	gObjects.push_back(new SceneObject(new Model(gCubeTangentMesh), new Texture("PatternDiffuseSpecular.dds"),
 	                                   gNormalMappingVertexShader, gNormalMappingPixelShader, gNoBlendingState,
-	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->textures.push_back(new Texture("PatternNormal.dds"));
 	gObjects.back()->model->SetPosition({ 50.0f, 10.0f,40.0f });
 	gObjects.back()->model->SetRotation({ 0.0f, 45.0f, 0.0f });
@@ -178,37 +180,44 @@ bool InitScene()
 	//Decals
 	gObjects.push_back(new SceneObject(new Model(gDecalMesh), new Texture("Moogle.png"), gPixelLightingVertexShader,
 	                                   gTextureAlphaPixelShader, gMultiplicativeBlendingState, gCullBackState,
-	                                   gUseDepthBufferState, gAnisotropic4xSampler));
+	                                   gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 39.9f });
 
 	gObjects.push_back(new SceneObject(new Model(gDecalMesh), new Texture("Cloud.png"), gPixelLightingVertexShader,
 	                                   gFadeTexturePixelShader, gAdditiveBlendingState, gCullBackState,
-	                                   gUseDepthBufferState, gAnisotropic4xSampler));
+	                                   gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->textures.push_back(new Texture("Cloud.png"));
 	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.1f });
 
 	//Teapot
 	gObjects.push_back(new SceneObject(new Model(gTeapotMesh), new Texture("MetalDiffuseSpecular.dds"),
 	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
-	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->model->SetPosition({ 20.0f, 0.0f, 0.0f });
 	gObjects.back()->model->SetScale(1.5f);
 
 	//Sphere
 	gObjects.push_back(new SceneObject(new Model(gSphereMesh), new Texture("tiles1.jpg"), gWiggleVertexShader,
 	                                   gTextureScrollPixelShader, gNoBlendingState, gCullBackState,
-	                                   gUseDepthBufferState, gAnisotropic4xSampler));
+	                                   gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->model->SetPosition({ 15.0f, 20.0f, 50.0f });
 
 	//Ground
 	gObjects.push_back(new SceneObject(new Model(gGroundMesh), new Texture("CobbleDiffuseSpecular.dds"),
 	                                   gNormalMappingVertexShader, gParallaxMappingPixelShader, gNoBlendingState,
-	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler));
+	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, false));
 	gObjects.back()->textures.push_back(new Texture("CobbleNormalHeight.dds"));
 
+	//Bike
+	gObjects.push_back(new SceneObject(new Model(gBikeMesh), new Texture("Skybox.dds"),
+		gReflectionVertexShader, gReflectionPixelShader, gNoBlendingState,
+		gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
+	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, -20.0f });
+	
+	//Skybox
 	gObjects.push_back(new SceneObject(new Model(gCubeMesh), new Texture("Skybox.dds"),
 		gSkyboxVertexShader, gSkyboxPixelShader, gNoBlendingState,
-		gCullFrontState, gSkyboxDepthBufferState, gTrilinearSampler));
+		gCullFrontState, gSkyboxDepthBufferState, gTrilinearSampler, false));
 	gObjects.back()->model->SetScale(25.0f);
 	
 	for (auto object : gObjects)
@@ -284,6 +293,7 @@ void ReleaseResources()
 	delete gCubeMesh;	     gCubeMesh		  = nullptr;
 	delete gCubeTangentMesh; gCubeTangentMesh = nullptr;
 	delete gDecalMesh;	     gDecalMesh		  = nullptr;
+	delete gBikeMesh;		 gBikeMesh		  = nullptr;
 }
 
 
@@ -380,10 +390,20 @@ void UpdateScene(float frameTime)
 	gPerFrameConstants.gTime += frameTime;
 	
 	// Controls
-	gObjects[5]->model->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma );
+	for (auto object : gObjects)
+	{
+		if (object->isControllable)
+		{
+			object->model->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
+		}
+	}
+	//Control bike's wheels
+	gObjects[8]->model->Control(1, frameTime, Key_T, Key_G, Key_0, Key_0, Key_0, Key_0, Key_0, Key_0);
+	gObjects[8]->model->Control(2, frameTime, Key_T, Key_G, Key_0, Key_0, Key_0, Key_0, Key_0, Key_0);
+	
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
 	
-    // Orbit the light
+    // Orbit 1st light
 	static float rotate = 0.0f;
     static bool go = true;
 	gLight[0]->model->SetPosition(gObjects[5]->model->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );

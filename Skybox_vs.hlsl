@@ -4,9 +4,6 @@ SkyboxPixelShaderInput main(SkyboxVertex modelVertex)
 {
 	SkyboxPixelShaderInput output;
 
-	/*output.projectedPosition = mul(float4(modelVertex.position, 1.0f), gViewProjectionMatrix * gWorldMatrix).xyww;
-
-	output.position = modelVertex.position;*/
 	// Input position is x,y,z only
 	float4 modelPosition = float4(modelVertex.position, 1);
 

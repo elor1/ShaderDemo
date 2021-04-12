@@ -28,6 +28,8 @@ ID3D11PixelShader* gParallaxMappingPixelShader = nullptr;
 ID3D11PixelShader* gTextureAlphaPixelShader = nullptr;
 ID3D11VertexShader* gSkyboxVertexShader = nullptr;
 ID3D11PixelShader* gSkyboxPixelShader = nullptr;
+ID3D11VertexShader* gReflectionVertexShader = nullptr;
+ID3D11PixelShader* gReflectionPixelShader = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -53,6 +55,8 @@ bool LoadShaders()
 	gTextureAlphaPixelShader = LoadPixelShader("TextureAlpha_ps");
 	gSkyboxVertexShader = LoadVertexShader("Skybox_vs");
 	gSkyboxPixelShader = LoadPixelShader("Skybox_ps");
+	gReflectionVertexShader = LoadVertexShader("Reflection_vs");
+	gReflectionPixelShader = LoadPixelShader("Reflection_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr ||
@@ -61,7 +65,8 @@ bool LoadShaders()
 		gNormalMappingPixelShader == nullptr || gNormalMappingVertexShader == nullptr ||
 		gParallaxMappingPixelShader == nullptr ||
 		gTextureAlphaPixelShader == nullptr||
-		gSkyboxVertexShader == nullptr || gSkyboxPixelShader == nullptr)
+		gSkyboxVertexShader == nullptr || gSkyboxPixelShader == nullptr ||
+		gReflectionVertexShader == nullptr || gReflectionPixelShader == nullptr)
     {
         gLastError = "Error loading shaders";
         return false;
@@ -77,7 +82,7 @@ void ReleaseShaders()
     if (gBasicTransformVertexShader)  gBasicTransformVertexShader->Release();
     if (gPixelLightingPixelShader)    gPixelLightingPixelShader->Release();
     if (gPixelLightingVertexShader)   gPixelLightingVertexShader->Release();
-	if (gTextureScrollPixelShader)			  gTextureScrollPixelShader->Release();
+	if (gTextureScrollPixelShader)	  gTextureScrollPixelShader->Release();
 	if (gWiggleVertexShader)		  gWiggleVertexShader->Release();
 	if (gFadeTexturePixelShader)	  gFadeTexturePixelShader->Release();
 	if (gNormalMappingPixelShader)	  gNormalMappingPixelShader->Release();
@@ -86,6 +91,8 @@ void ReleaseShaders()
 	if (gTextureAlphaPixelShader)	  gTextureAlphaPixelShader->Release();
 	if (gSkyboxVertexShader)		  gSkyboxVertexShader->Release();
 	if (gSkyboxPixelShader)			  gSkyboxPixelShader->Release();
+	if (gReflectionVertexShader)	  gReflectionVertexShader->Release();
+	if (gReflectionPixelShader)		  gReflectionPixelShader->Release();
 }
 
 

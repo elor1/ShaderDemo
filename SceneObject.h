@@ -9,7 +9,7 @@ class SceneObject
 public:
 	SceneObject(Model* Model, Texture* Texture, ID3D11VertexShader* VertexShader, ID3D11PixelShader* PixelShader,
 	            ID3D11BlendState* BlendState, ID3D11RasterizerState* RasterizerState,
-	            ID3D11DepthStencilState* DepthStencilState, ID3D11SamplerState* SamplerState);
+	            ID3D11DepthStencilState* DepthStencilState, ID3D11SamplerState* SamplerState, bool control);
 	~SceneObject();
 	
 	Model* model;
@@ -21,6 +21,8 @@ public:
 	ID3D11RasterizerState* rasterizerState;
 	ID3D11DepthStencilState* depthStencilState;
 	ID3D11SamplerState* samplerState;
+
+	bool isControllable = false;
 
 	virtual void Render();
 };

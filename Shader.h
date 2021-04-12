@@ -28,6 +28,8 @@ extern ID3D11PixelShader* gParallaxMappingPixelShader;
 extern ID3D11PixelShader* gTextureAlphaPixelShader;
 extern ID3D11VertexShader* gSkyboxVertexShader;
 extern ID3D11PixelShader* gSkyboxPixelShader;
+extern ID3D11VertexShader* gReflectionVertexShader;
+extern ID3D11PixelShader* gReflectionPixelShader;
 
 
 //--------------------------------------------------------------------------------------

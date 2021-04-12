@@ -75,6 +75,15 @@ struct SkyboxPixelShaderInput
 	float3 position : position;
 };
 
+struct ReflectionPixelShaderInput
+{
+	float4 projectedPosition : SV_Position;
+	float3 worldPosition : worldPosition;
+	float3 worldNormal   : worldNormal;
+	float3 position : position;
+	float2 uv : uv;
+};
+
 //--------------------------------------------------------------------------------------
 // Constant Buffers
 //--------------------------------------------------------------------------------------
