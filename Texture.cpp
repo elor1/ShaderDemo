@@ -22,3 +22,8 @@ bool Texture::Load()
 	}
 	return true;
 }
+
+ID3D11ShaderResourceView** Texture::TextureSRV()
+{
+	return &textureSRV;
+}

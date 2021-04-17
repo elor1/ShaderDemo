@@ -155,68 +155,68 @@ bool InitScene()
 	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("brick1.jpg"), gPixelLightingVertexShader,
 	                                   gFadeTexturePixelShader, gNoBlendingState, gCullBackState, gUseDepthBufferState,
 	                                   gAnisotropic4xSampler, false));
-	gObjects.back()->textures.push_back(new Texture("wood2.jpg"));
-	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.0f });
+	gObjects.back()->AddTexture(new Texture("wood2.jpg"));
+	gObjects.back()->ObjectModel()->SetPosition({ 50.0f, 10.0f, -40.0f });
 
 	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("StoneDiffuseSpecular.dds"),
 	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, false));
-	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 40.0f });
+	gObjects.back()->ObjectModel()->SetPosition({ -10.0f, 30.0f, 40.0f });
 
 	gObjects.push_back(new SceneObject(new Model(gMeshes[5]), new Texture("PatternDiffuseSpecular.dds"),
 	                                   gNormalMappingVertexShader, gNormalMappingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
-	gObjects.back()->textures.push_back(new Texture("PatternNormal.dds"));
-	gObjects.back()->model->SetPosition({ 50.0f, 10.0f,40.0f });
-	gObjects.back()->model->SetRotation({ 0.0f, 45.0f, 0.0f });
-	gObjects.back()->model->SetScale(1.5f);
+	gObjects.back()->AddTexture(new Texture("PatternNormal.dds"));
+	gObjects.back()->ObjectModel()->SetPosition({ 50.0f, 10.0f,40.0f });
+	gObjects.back()->ObjectModel()->SetRotation({ 0.0f, 45.0f, 0.0f });
+	gObjects.back()->ObjectModel()->SetScale(1.5f);
 
 	//Decals
 	gObjects.push_back(new SceneObject(new Model(gMeshes[6]), new Texture("Moogle.png"), gPixelLightingVertexShader,
 	                                   gTextureAlphaPixelShader, gMultiplicativeBlendingState, gCullBackState,
 	                                   gUseDepthBufferState, gAnisotropic4xSampler, false));
-	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, 39.9f });
+	gObjects.back()->ObjectModel()->SetPosition({ -10.0f, 30.0f, 39.9f });
 
 	gObjects.push_back(new SceneObject(new Model(gMeshes[6]), new Texture("Cloud.png"), gPixelLightingVertexShader,
 	                                   gFadeTexturePixelShader, gAdditiveBlendingState, gCullBackState,
 	                                   gUseDepthBufferState, gAnisotropic4xSampler, false));
-	gObjects.back()->textures.push_back(new Texture("Cloud.png"));
-	gObjects.back()->model->SetPosition({ 50.0f, 10.0f, -40.1f });
+	gObjects.back()->AddTexture(new Texture("Cloud.png"));
+	gObjects.back()->ObjectModel()->SetPosition({ 50.0f, 10.0f, -40.1f });
 
 	//Teapot
 	gObjects.push_back(new SceneObject(new Model(gMeshes[0]), new Texture("MetalDiffuseSpecular.dds"),
 	                                   gPixelLightingVertexShader, gPixelLightingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
-	gObjects.back()->model->SetPosition({ 20.0f, 0.0f, 0.0f });
-	gObjects.back()->model->SetScale(1.5f);
+	gObjects.back()->ObjectModel()->SetPosition({ 20.0f, 0.0f, 0.0f });
+	gObjects.back()->ObjectModel()->SetScale(1.5f);
 
 	//Sphere
 	gObjects.push_back(new SceneObject(new Model(gMeshes[1]), new Texture("tiles1.jpg"), gWiggleVertexShader,
 	                                   gTextureScrollPixelShader, gNoBlendingState, gCullBackState,
 	                                   gUseDepthBufferState, gAnisotropic4xSampler, true));
-	gObjects.back()->model->SetPosition({ 15.0f, 20.0f, 50.0f });
+	gObjects.back()->ObjectModel()->SetPosition({ 15.0f, 20.0f, 50.0f });
 
 	//Ground
 	gObjects.push_back(new SceneObject(new Model(gMeshes[3]), new Texture("CobbleDiffuseSpecular.dds"),
 	                                   gNormalMappingVertexShader, gParallaxMappingPixelShader, gNoBlendingState,
 	                                   gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, false));
-	gObjects.back()->textures.push_back(new Texture("CobbleNormalHeight.dds"));
+	gObjects.back()->AddTexture(new Texture("CobbleNormalHeight.dds"));
 
 	//Bike
 	gObjects.push_back(new SceneObject(new Model(gMeshes[7]), new Texture("Skybox.dds"),
 		gReflectionVertexShader, gReflectionPixelShader, gNoBlendingState,
 		gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
-	gObjects.back()->model->SetPosition({ -10.0f, 30.0f, -20.0f });
+	gObjects.back()->ObjectModel()->SetPosition({ -10.0f, 30.0f, -20.0f });
 	
 	//Skybox
 	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("Skybox.dds"),
 		gSkyboxVertexShader, gSkyboxPixelShader, gNoBlendingState,
 		gCullFrontState, gSkyboxDepthBufferState, gTrilinearSampler, false));
-	gObjects.back()->model->SetScale(25.0f);
+	gObjects.back()->ObjectModel()->SetScale(25.0f);
 	
 	for (auto object : gObjects)
 	{
-		for (auto texture : object->textures)
+		for (auto texture : object->Textures())
 		{
 			if (!texture->Load())
 			{
@@ -230,17 +230,17 @@ bool InitScene()
 	{
 		gLight.push_back(new Light(new Model(gMeshes[4]), new Texture("Flare.jpg"), gBasicTransformVertexShader, gLightModelPixelShader, gAdditiveBlendingState, gCullNoneState, gDepthReadOnlyState, gAnisotropic4xSampler, BASE_LIGHT_STRENGTH, { 0.8f, 0.8f, 1.0f }));
 	}
-	gLight[0]->model->SetPosition({ 30, 20, 0 });
-	gLight[1]->colour = { 1.0f, 0.8f, 0.2f };
-	gLight[1]->model->SetPosition({ -80, 50, 40 });
-	gLight[1]->model->SetRotation({ 0.0f, 1.7f, 0.0f });
-	gLight[1]->strength *= 3;
+	gLight[0]->ObjectModel()->SetPosition({ 30, 20, 0 });
+	gLight[1]->SetColour({ 1.0f, 0.8f, 0.2f });
+	gLight[1]->ObjectModel()->SetPosition({ -80, 50, 40 });
+	gLight[1]->ObjectModel()->SetRotation({ 0.0f, 1.7f, 0.0f });
+	gLight[1]->SetStrength(gLight[1]->Strength() * 3);
 
 	for (auto light : gLight)
 	{
-		light->model->SetScale(pow(light->strength, 0.7f)); // Convert light strength into a nice value for the scale of the light
+		light->ObjectModel()->SetScale(pow(light->Strength(), 0.7f)); // Convert light strength into a nice value for the scale of the light
 		
-		for (auto texture : light->textures)
+		for (auto texture : light->Textures())
 		{
 			if (!texture->Load())
 			{
@@ -312,7 +312,7 @@ void RenderSceneFromCamera(Camera* camera)
 	
     for (auto light : gLight)
     {
-		gPerModelConstants.objectColour = light->colour;
+		gPerModelConstants.objectColour = light->Colour();
 		light->Render();
     }
 }
@@ -327,12 +327,12 @@ void RenderScene()
 
     // Set up the light information in the constant buffer
     // Don't send to the GPU yet, the function RenderSceneFromCamera will do that
-    gPerFrameConstants.light1Colour   = gLight[0]->colour * gLight[0]->strength;
-    gPerFrameConstants.light1Position = gLight[0]->model->Position();
+    gPerFrameConstants.light1Colour   = gLight[0]->Colour() * gLight[0]->Strength();
+    gPerFrameConstants.light1Position = gLight[0]->ObjectModel()->Position();
 	
-    gPerFrameConstants.light2Colour   = gLight[1]->colour * gLight[1]->strength;
-    gPerFrameConstants.light2Position = gLight[1]->model->Position();
-	gPerFrameConstants.light2Facing	  = Normalise(gLight[1]->model->WorldMatrix().GetZAxis());
+    gPerFrameConstants.light2Colour   = gLight[1]->Colour() * gLight[1]->Strength();
+    gPerFrameConstants.light2Position = gLight[1]->ObjectModel()->Position();
+	gPerFrameConstants.light2Facing	  = Normalise(gLight[1]->ObjectModel()->WorldMatrix().GetZAxis());
 	gPerFrameConstants.light2CosHalfAngle = cos(ToRadians(SPOTLIGHT_ANGLE / 2));
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
@@ -382,39 +382,39 @@ void UpdateScene(float frameTime)
 	// Controls
 	for (auto object : gObjects)
 	{
-		if (object->isControllable)
+		if (object->IsControllable())
 		{
-			object->model->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
+			object->ObjectModel()->Control(0, frameTime, Key_I, Key_K, Key_J, Key_L, Key_U, Key_O, Key_Period, Key_Comma);
 		}
 	}
 	//Control bike's wheels
-	gObjects[8]->model->Control(1, frameTime, Key_T, Key_G, Key_0, Key_0, Key_0, Key_0, Key_0, Key_0);
-	gObjects[8]->model->Control(2, frameTime, Key_T, Key_G, Key_0, Key_0, Key_0, Key_0, Key_0, Key_0);
+	gObjects[8]->ObjectModel()->Control(1, frameTime, Key_T, Key_G, Key_0, Key_0, Key_0, Key_0, Key_0, Key_0);
+	gObjects[8]->ObjectModel()->Control(2, frameTime, Key_T, Key_G, Key_0, Key_0, Key_0, Key_0, Key_0, Key_0);
 	
 	gCamera->Control(frameTime, Key_Up, Key_Down, Key_Left, Key_Right, Key_W, Key_S, Key_A, Key_D);
 	
     // Orbit 1st light
 	static float rotate = 0.0f;
     static bool go = true;
-	gLight[0]->model->SetPosition(gObjects[5]->model->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
+	gLight[0]->ObjectModel()->SetPosition(gObjects[5]->ObjectModel()->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;
 
 	//Update 1st light's strength
-	gLight[0]->strength = abs(sin(gPerFrameConstants.gTime)) * BASE_LIGHT_STRENGTH;
-	gLight[0]->model->SetScale(pow(gLight[0]->strength, 0.7f));
+	gLight[0]->SetStrength(abs(sin(gPerFrameConstants.gTime)) * BASE_LIGHT_STRENGTH);
+	gLight[0]->ObjectModel()->SetScale(pow(gLight[0]->Strength(), 0.7f));
 
 	//Update 2nd light's colour
-	CVector3 HSLColour = RGBToHSL(gLight[1]->colour);
+	CVector3 HSLColour = RGBToHSL(gLight[1]->Colour());
 	HSLColour.x += LIGHT_COLOUR_CHANGE;
 	if (HSLColour.x >= 360.0f)
 	{
 		HSLColour.x = 0.0f;
 	}
-	gLight[1]->colour = HSLToRGB(HSLColour);
+	gLight[1]->SetColour(HSLToRGB(HSLColour));
 
 	//Skybox follows camera;
-	gObjects.back()->model->SetPosition(gCamera->Position());
+	gObjects.back()->ObjectModel()->SetPosition(gCamera->Position());
 
     // Toggle FPS limiting
     if (KeyHit(Key_P))  lockFPS = !lockFPS;

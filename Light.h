@@ -9,8 +9,12 @@ public:
 	Light(Model* Model, Texture* Texture, ID3D11VertexShader* VertexShader, ID3D11PixelShader* PixelShader,
 		ID3D11BlendState* BlendState, ID3D11RasterizerState* RasterizerState,
 		ID3D11DepthStencilState* DepthStencilState, ID3D11SamplerState* SamplerState, float Strength, CVector3 Colour);
-	//~Light();
-	
+	CVector3 Colour();
+	float Strength();
+	void SetColour(CVector3 Colour);
+	void SetStrength(float Strength);
+
+private:
 	CVector3 colour;
 	float    strength;
 };

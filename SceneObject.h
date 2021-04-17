@@ -11,7 +11,19 @@ public:
 	            ID3D11BlendState* BlendState, ID3D11RasterizerState* RasterizerState,
 	            ID3D11DepthStencilState* DepthStencilState, ID3D11SamplerState* SamplerState, bool control);
 	~SceneObject();
-	
+	Model* ObjectModel();
+	std::vector<Texture*> Textures();
+	void AddTexture(Texture* texture);
+	bool IsControllable();
+	ID3D11VertexShader* VertexShader();
+	ID3D11PixelShader* PixelShader();
+	ID3D11BlendState* BlendState();
+	ID3D11RasterizerState* RasterizerState();
+	ID3D11DepthStencilState* DepthStencilState();
+	ID3D11SamplerState** SamplerState();
+	virtual void Render();
+
+private:
 	Model* model;
 	std::vector<Texture*> textures;
 
@@ -24,6 +36,6 @@ public:
 
 	bool isControllable = false;
 
-	virtual void Render();
+	
 };
 

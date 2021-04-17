@@ -1,12 +1,12 @@
 #include "Skybox.h"
 void Skybox::Render()
 {
-	gD3DContext->VSSetShader(vertexShader, nullptr, 0);
-	gD3DContext->PSSetShader(pixelShader, nullptr, 0);
-	gD3DContext->OMSetBlendState(blendState, nullptr, 0xffffff);
-	gD3DContext->OMSetDepthStencilState(depthStencilState, 0);
-	gD3DContext->RSSetState(rasterizerState);
-	gD3DContext->PSSetSamplers(0, 1, &samplerState);
+	gD3DContext->VSSetShader(VertexShader(), nullptr, 0);
+	gD3DContext->PSSetShader(PixelShader(), nullptr, 0);
+	gD3DContext->OMSetBlendState(BlendState(), nullptr, 0xffffff);
+	gD3DContext->OMSetDepthStencilState(DepthStencilState(), 0);
+	gD3DContext->RSSetState(RasterizerState());
+	gD3DContext->PSSetSamplers(0, 1, SamplerState());
 
-	model->Render();
+	ObjectModel()->Render();
 }

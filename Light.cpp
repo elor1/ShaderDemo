@@ -13,3 +13,23 @@ Light::Light(Model* Model, Texture* Texture, ID3D11VertexShader* VertexShader, I
 	strength = Strength;
 	colour = Colour;
 }
+
+CVector3 Light::Colour()
+{
+	return colour;
+}
+
+float Light::Strength()
+{
+	return strength;
+}
+
+void Light::SetColour(CVector3 Colour)
+{
+	colour = Colour;
+}
+
+void Light::SetStrength(float Strength)
+{
+	strength = Strength;
+}
