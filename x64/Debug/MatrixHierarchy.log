@@ -1,1 +1,30 @@
-﻿  MatrixHierarchy.vcxproj -> C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\\CO2409Assignment.exe
+﻿  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\Reflection_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\Reflection_vs.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\Skybox_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\Skybox_vs.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\TextureFade_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\LightModel_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\BasicTransform_vs.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\NormalMapping_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\NormalMapping_vs.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\ParallaxMapping_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\PixelLighting_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\PixelLighting_vs.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\TextureScroll_ps.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\Wiggle_vs.cso
+  compilation object save succeeded; see C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\TextureAlpha_ps.cso
+  Camera.cpp
+  Direct3DSetup.cpp
+  Light.cpp
+  Main.cpp
+  Mesh.cpp
+  Model.cpp
+  Scene.cpp
+  SceneObject.cpp
+  Shader.cpp
+  Skybox.cpp
+  State.cpp
+  Texture.cpp
+  GraphicsHelpers.cpp
+  Generating Code...
+  MatrixHierarchy.vcxproj -> C:\Users\Emma\Documents\Uni\Year 2\Computer Graphics\CO2409Assignment\\CO2409Assignment.exe

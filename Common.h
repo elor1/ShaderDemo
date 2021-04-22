@@ -72,17 +72,18 @@ struct PerFrameConstants
     CVector3   light2Colour;
     float      padding4;
 	CVector3   light2Facing;
-	float	   padding7;
+	float	   padding5;
 
 	float	   light2CosHalfAngle;
+	float	   gTime;
+	float	   padding6;
+	float      padding7;
 
     CVector3   ambientColour;
     float      specularPower;
 
     CVector3   cameraPosition;
-    float      padding5;
-
-	float gTime;
+	float      padding8;
 };
 
 extern PerFrameConstants gPerFrameConstants;      // This variable holds the CPU-side constant buffer described above
@@ -96,7 +97,7 @@ struct PerModelConstants
 {
     CMatrix4x4 worldMatrix;
     CVector3   objectColour; // Allows each light model to be tinted to match the light colour they cast
-    float      padding6;
+    float      padding9;
 };
 extern PerModelConstants gPerModelConstants;      // This variable holds the CPU-side constant buffer described above
 extern ID3D11Buffer*     gPerModelConstantBuffer; // This variable controls the GPU-side constant buffer related to the above structure
