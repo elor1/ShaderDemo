@@ -30,6 +30,9 @@ extern ID3D11VertexShader* gSkyboxVertexShader;
 extern ID3D11PixelShader* gSkyboxPixelShader;
 extern ID3D11VertexShader* gReflectionVertexShader;
 extern ID3D11PixelShader* gReflectionPixelShader;
+extern ID3D11VertexShader* gCellShadingOutlineVertexShader;
+extern ID3D11PixelShader* gCellShadingOutlinePixelShader;
+extern ID3D11PixelShader* gCellShadingPixelShader;
 
 
 //--------------------------------------------------------------------------------------

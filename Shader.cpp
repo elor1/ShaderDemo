@@ -30,6 +30,9 @@ ID3D11VertexShader* gSkyboxVertexShader = nullptr;
 ID3D11PixelShader* gSkyboxPixelShader = nullptr;
 ID3D11VertexShader* gReflectionVertexShader = nullptr;
 ID3D11PixelShader* gReflectionPixelShader = nullptr;
+ID3D11VertexShader* gCellShadingOutlineVertexShader = nullptr;
+ID3D11PixelShader* gCellShadingOutlinePixelShader = nullptr;
+ID3D11PixelShader* gCellShadingPixelShader = nullptr;
 
 
 //--------------------------------------------------------------------------------------
@@ -57,6 +60,9 @@ bool LoadShaders()
 	gSkyboxPixelShader = LoadPixelShader("Skybox_ps");
 	gReflectionVertexShader = LoadVertexShader("Reflection_vs");
 	gReflectionPixelShader = LoadPixelShader("Reflection_ps");
+	gCellShadingOutlineVertexShader = LoadVertexShader("CellShadingOutline_vs");
+	gCellShadingOutlinePixelShader = LoadPixelShader("CellShadingOutline_ps");
+	gCellShadingPixelShader = LoadPixelShader("CellShading_ps");
 
     if (gPixelLightingVertexShader  == nullptr || gPixelLightingPixelShader == nullptr ||
         gBasicTransformVertexShader == nullptr || gLightModelPixelShader    == nullptr ||
@@ -66,7 +72,9 @@ bool LoadShaders()
 		gParallaxMappingPixelShader == nullptr ||
 		gTextureAlphaPixelShader == nullptr||
 		gSkyboxVertexShader == nullptr || gSkyboxPixelShader == nullptr ||
-		gReflectionVertexShader == nullptr || gReflectionPixelShader == nullptr)
+		gReflectionVertexShader == nullptr || gReflectionPixelShader == nullptr ||
+		gCellShadingOutlineVertexShader == nullptr || gCellShadingOutlinePixelShader == nullptr ||
+		gCellShadingPixelShader == nullptr)
     {
         gLastError = "Error loading shaders";
         return false;
@@ -93,6 +101,9 @@ void ReleaseShaders()
 	if (gSkyboxPixelShader)			  gSkyboxPixelShader->Release();
 	if (gReflectionVertexShader)	  gReflectionVertexShader->Release();
 	if (gReflectionPixelShader)		  gReflectionPixelShader->Release();
+	if (gCellShadingOutlineVertexShader) gCellShadingOutlineVertexShader->Release();
+	if (gCellShadingOutlinePixelShader) gCellShadingOutlinePixelShader->Release();
+	if (gCellShadingPixelShader)	  gCellShadingPixelShader->Release();
 }
 
 

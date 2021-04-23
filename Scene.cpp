@@ -47,7 +47,7 @@ const float LIGHT_COLOUR_CHANGE = 0.3f;
 const float SPOTLIGHT_ANGLE = 90.0f;
 
 // Meshes, models and cameras, same meaning as TL-Engine. Meshes prepared in InitGeometry function, Models & camera in InitScene
-const int NUM_MESHES = 8;
+const int NUM_MESHES = 9;
 Mesh* gMeshes[NUM_MESHES];
 
 std::vector<SceneObject*> gObjects;
@@ -108,6 +108,7 @@ bool InitGeometry()
 		gMeshes[5] = new Mesh("Cube.x", true);
 		gMeshes[6] = new Mesh("Decal.x");
 		gMeshes[7] = new Mesh("Bike.x");
+		gMeshes[8] = new Mesh("Troll.x");
     }
     catch (std::runtime_error e)
     {
@@ -207,6 +208,21 @@ bool InitScene()
 		gReflectionVertexShader, gReflectionPixelShader, gNoBlendingState,
 		gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->ObjectModel()->SetPosition({ -10.0f, 30.0f, -20.0f });
+
+	//Troll outline
+	gObjects.push_back(new SceneObject(new Model(gMeshes[8]), new Texture("TrollDiffuseSpecular.dds"),
+		gCellShadingOutlineVertexShader, gCellShadingOutlinePixelShader, gNoBlendingState,
+		gCullFrontState, gUseDepthBufferState, gAnisotropic4xSampler, true));
+	gObjects.back()->ObjectModel()->SetPosition({ 0.0f, 20.0f, -65.0f });
+	gObjects.back()->ObjectModel()->SetScale(4.0f);
+
+	//Troll
+	gObjects.push_back(new SceneObject(new Model(gMeshes[8]), new Texture("TrollDiffuseSpecular.dds"),
+		gPixelLightingVertexShader, gCellShadingPixelShader, gNoBlendingState,
+		gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
+	gObjects.back()->AddTexture(new Texture("CellGradient.png"));
+	gObjects.back()->ObjectModel()->SetPosition({ 0.0f, 20.0f, -65.0f });
+	gObjects.back()->ObjectModel()->SetScale(4.0f);
 	
 	//Skybox
 	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("Skybox.dds"),
@@ -305,6 +321,7 @@ void RenderSceneFromCamera(Camera* camera)
     gD3DContext->VSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
     gD3DContext->PSSetConstantBuffers(0, 1, &gPerFrameConstantBuffer);
 
+	gD3DContext->PSSetSamplers(1, 1, &gPointSampler);
 	for (auto object : gObjects)
 	{
 		object->Render();
