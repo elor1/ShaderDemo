@@ -210,19 +210,21 @@ bool InitScene()
 	gObjects.back()->ObjectModel()->SetPosition({ -10.0f, 30.0f, -20.0f });
 
 	//Troll outline
-	gObjects.push_back(new SceneObject(new Model(gMeshes[8]), new Texture("TrollDiffuseSpecular.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[8]), new Texture("Green.png"),
 		gCellShadingOutlineVertexShader, gCellShadingOutlinePixelShader, gNoBlendingState,
 		gCullFrontState, gUseDepthBufferState, gAnisotropic4xSampler, true));
-	gObjects.back()->ObjectModel()->SetPosition({ 0.0f, 20.0f, -65.0f });
-	gObjects.back()->ObjectModel()->SetScale(4.0f);
+	gObjects.back()->ObjectModel()->SetPosition({ 60.0f, 0.0f, 0.0f });
+	gObjects.back()->ObjectModel()->SetRotation({ 0.0f, -90.0f, 0.0f });
+	gObjects.back()->ObjectModel()->SetScale(7.0f);
 
 	//Troll
-	gObjects.push_back(new SceneObject(new Model(gMeshes[8]), new Texture("TrollDiffuseSpecular.dds"),
+	gObjects.push_back(new SceneObject(new Model(gMeshes[8]), new Texture("Green.png"),
 		gPixelLightingVertexShader, gCellShadingPixelShader, gNoBlendingState,
 		gCullBackState, gUseDepthBufferState, gAnisotropic4xSampler, true));
 	gObjects.back()->AddTexture(new Texture("CellGradient.png"));
-	gObjects.back()->ObjectModel()->SetPosition({ 0.0f, 20.0f, -65.0f });
-	gObjects.back()->ObjectModel()->SetScale(4.0f);
+	gObjects.back()->ObjectModel()->SetPosition({ 60.0f, 0.0f, 0.0f });
+	gObjects.back()->ObjectModel()->SetRotation({ 0.0f, -90.0f, 0.0f });
+	gObjects.back()->ObjectModel()->SetScale(7.0f);
 	
 	//Skybox
 	gObjects.push_back(new SceneObject(new Model(gMeshes[2]), new Texture("Skybox.dds"),
