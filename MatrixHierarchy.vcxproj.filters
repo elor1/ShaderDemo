@@ -30,7 +30,6 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="SceneObject.cpp" />
-    <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -68,7 +67,6 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="SceneObject.h" />
-    <ClInclude Include="Skybox.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Utility">

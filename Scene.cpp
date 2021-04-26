@@ -57,8 +57,7 @@ Camera* gCamera;
 
 // Store lights in an array in this exercise
 const int NUM_LIGHTS = 2;
-//Light* gLights[NUM_LIGHTS];
-std::vector<Light*> gLight;
+std::vector<Light*> gLights;
 
 
 // Additional light information
@@ -246,15 +245,15 @@ bool InitScene()
 	//Light set up
 	for (int i = 0 ; i < NUM_LIGHTS; i++)
 	{
-		gLight.push_back(new Light(new Model(gMeshes[4]), new Texture("Flare.jpg"), gBasicTransformVertexShader, gLightModelPixelShader, gAdditiveBlendingState, gCullNoneState, gDepthReadOnlyState, gAnisotropic4xSampler, BASE_LIGHT_STRENGTH, { 0.8f, 0.8f, 1.0f }));
+		gLights.push_back(new Light(new Model(gMeshes[4]), new Texture("Flare.jpg"), gBasicTransformVertexShader, gLightModelPixelShader, gAdditiveBlendingState, gCullNoneState, gDepthReadOnlyState, gAnisotropic4xSampler, BASE_LIGHT_STRENGTH, { 0.8f, 0.8f, 1.0f }));
 	}
-	gLight[0]->ObjectModel()->SetPosition({ 30, 20, 0 });
-	gLight[1]->SetColour({ 1.0f, 0.8f, 0.2f });
-	gLight[1]->ObjectModel()->SetPosition({ -80, 50, 40 });
-	gLight[1]->ObjectModel()->SetRotation({ 0.0f, 1.7f, 0.0f });
-	gLight[1]->SetStrength(gLight[1]->Strength() * 3);
+	gLights[0]->ObjectModel()->SetPosition({ 30, 20, 0 });
+	gLights[1]->SetColour({ 1.0f, 0.8f, 0.2f });
+	gLights[1]->ObjectModel()->SetPosition({ -80, 50, 40 });
+	gLights[1]->ObjectModel()->SetRotation({ 0.0f, 1.7f, 0.0f });
+	gLights[1]->SetStrength(gLights[1]->Strength() * 3);
 
-	for (auto light : gLight)
+	for (auto light : gLights)
 	{
 		light->ObjectModel()->SetScale(pow(light->Strength(), 0.7f)); // Convert light strength into a nice value for the scale of the light
 		
@@ -286,7 +285,7 @@ void ReleaseResources()
 
     ReleaseShaders();
 	
-	for (auto light : gLight)
+	for (auto light : gLights)
 	{
 		delete light;	light = nullptr;
 	}
@@ -329,7 +328,7 @@ void RenderSceneFromCamera(Camera* camera)
 		object->Render();
 	}
 	
-    for (auto light : gLight)
+    for (auto light : gLights)
     {
 		gPerModelConstants.objectColour = light->Colour();
 		light->Render();
@@ -346,12 +345,12 @@ void RenderScene()
 
     // Set up the light information in the constant buffer
     // Don't send to the GPU yet, the function RenderSceneFromCamera will do that
-    gPerFrameConstants.light1Colour   = gLight[0]->Colour() * gLight[0]->Strength();
-    gPerFrameConstants.light1Position = gLight[0]->ObjectModel()->Position();
+    gPerFrameConstants.light1Colour   = gLights[0]->Colour() * gLights[0]->Strength();
+    gPerFrameConstants.light1Position = gLights[0]->ObjectModel()->Position();
 	
-    gPerFrameConstants.light2Colour   = gLight[1]->Colour() * gLight[1]->Strength();
-    gPerFrameConstants.light2Position = gLight[1]->ObjectModel()->Position();
-	gPerFrameConstants.light2Facing	  = Normalise(gLight[1]->ObjectModel()->WorldMatrix().GetZAxis());
+    gPerFrameConstants.light2Colour   = gLights[1]->Colour() * gLights[1]->Strength();
+    gPerFrameConstants.light2Position = gLights[1]->ObjectModel()->Position();
+	gPerFrameConstants.light2Facing	  = Normalise(gLights[1]->ObjectModel()->WorldMatrix().GetZAxis());
 	gPerFrameConstants.light2CosHalfAngle = cos(ToRadians(SPOTLIGHT_ANGLE / 2));
 
     gPerFrameConstants.ambientColour  = gAmbientColour;
@@ -415,22 +414,22 @@ void UpdateScene(float frameTime)
     // Orbit 1st light
 	static float rotate = 0.0f;
     static bool go = true;
-	gLight[0]->ObjectModel()->SetPosition(gObjects[5]->ObjectModel()->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
+	gLights[0]->ObjectModel()->SetPosition(gObjects[5]->ObjectModel()->Position() + CVector3{ cos(rotate) * gLightOrbit, 10, sin(rotate) * gLightOrbit } );
     if (go)  rotate -= gLightOrbitSpeed * frameTime;
     if (KeyHit(Key_1))  go = !go;
 
 	//Update 1st light's strength
-	gLight[0]->SetStrength(abs(sin(gPerFrameConstants.gTime)) * BASE_LIGHT_STRENGTH);
-	gLight[0]->ObjectModel()->SetScale(pow(gLight[0]->Strength(), 0.7f));
+	gLights[0]->SetStrength(abs(sin(gPerFrameConstants.gTime)) * BASE_LIGHT_STRENGTH);
+	gLights[0]->ObjectModel()->SetScale(pow(gLights[0]->Strength(), 0.7f));
 
 	//Update 2nd light's colour
-	CVector3 HSLColour = RGBToHSL(gLight[1]->Colour());
+	CVector3 HSLColour = RGBToHSL(gLights[1]->Colour());
 	HSLColour.x += LIGHT_COLOUR_CHANGE;
 	if (HSLColour.x >= 360.0f)
 	{
 		HSLColour.x = 0.0f;
 	}
-	gLight[1]->SetColour(HSLToRGB(HSLColour));
+	gLights[1]->SetColour(HSLToRGB(HSLColour));
 
 	//Skybox follows camera;
 	gObjects.back()->ObjectModel()->SetPosition(gCamera->Position());
