@@ -18,7 +18,7 @@ SimplePixelShaderInput main(BasicVertex modelVertex)
 
 	// Now we return to the world position of this vertex and expand it along the world normal - that will expand the geometry outwards.
 	// Use the distance from the camera to decide how much to expand. Use this distance together with a sqrt to creates an outline that
-	// gets thinner in the distance, but always remains clear. Overall thickness is also controlled by the constant "OutlineThickness"
+	// gets thinner in the distance, but always remains clear.
 	worldPosition += 0.015f * sqrt(viewPosition.z) * worldNormal;
 
 	// Transform new expanded world-space vertex position to view space then 2D projection space and output

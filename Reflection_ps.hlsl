@@ -4,7 +4,6 @@ TextureCube CubeMap : register(t0);
 SamplerState TexSampler : register(s0);
 
 float4 main(ReflectionPixelShaderInput input) : SV_Target{
-	float reflectivity = 0.8f;
 	
 	// Normal might have been scaled by model scaling or interpolation so renormalise
 	input.worldNormal = normalize(input.worldNormal);
